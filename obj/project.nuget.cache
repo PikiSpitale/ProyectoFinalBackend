@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "hzgJxXGZl2Q=",
+  "success": true,
+  "projectFilePath": "/Users/agustinspitale/Desktop/Projects/Proyecto-Final-TUP-Agustin-Y-Mateo/Backend/ProyectAPI/ProyectAPI.csproj",
+  "expectedPackageFiles": [
+    "/Users/agustinspitale/.nuget/packages/microsoft.aspnetcore.openapi/10.0.12/microsoft.aspnetcore.openapi.10.0.12.nupkg.sha512",
+    "/Users/agustinspitale/.nuget/packages/microsoft.openapi/2.12.0/microsoft.openapi.2.12.0.nupkg.sha512",
+    "/Users/agustinspitale/.nuget/packages/system.text.json/8.0.5/system.text.json.8.0.5.nupkg.sha512"
+  ],
+  "logs": []
+}
