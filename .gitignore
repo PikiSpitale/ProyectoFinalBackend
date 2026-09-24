@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+
+# Rider / JetBrains
+.idea/
+
+# Local configuration and secrets
+.env
+.env.*
+appsettings.Local.json
+usersecrets.json
+
+# OS files
+.DS_Store
+
+# IDE and editor files
+*.user
+*.suo
