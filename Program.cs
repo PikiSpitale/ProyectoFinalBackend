@@ -1,4 +1,7 @@
 using ProyectAPI.Infrastructure;
+using ProyectAPI.Repositories;
+using ProyectAPI.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -16,6 +19,9 @@ builder.Services
     .ValidateOnStart();
 
 builder.Services.AddSingleton<MongoDbContext>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddControllers();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -27,6 +33,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "v1");
+    });
 }
 app.UseHttpsRedirection();
 
@@ -58,6 +69,8 @@ app.MapGet(
         }
     }
 );
+
+app.MapControllers();
 
 
 app.Run();
