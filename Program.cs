@@ -1,9 +1,9 @@
 using ProyectAPI.Infrastructure;
+using MongoDB.Driver;
+
 var builder = WebApplication.CreateBuilder(args);
 
-
-//Database connection
-
+// Configuración de tu base de datos (tu código original)
 builder.Services
     .AddOptions<MongoDbSettings>()
     .Bind(builder.Configuration.GetSection(MongoDbSettings.SectionName))
@@ -17,21 +17,21 @@ builder.Services
 
 builder.Services.AddSingleton<MongoDbContext>();
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(); // <-- NUEVO: Registra Swagger
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();   // <-- NUEVO: Genera el archivo Swagger JSON
+    app.UseSwaggerUI(); // <-- NUEVO: Habilita la interfaz gráfica web
 }
+
 app.UseHttpsRedirection();
 
-//Temporal connection
-
+// Tu endpoint original para probar la conexión
 app.MapGet(
     "/health/mongodb",
     async (
@@ -58,6 +58,5 @@ app.MapGet(
         }
     }
 );
-
 
 app.Run();
