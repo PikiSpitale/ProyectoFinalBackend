@@ -17,3 +17,4 @@ usersecrets.json
 # IDE and editor files
 *.user
 *.suo
+.vs/
