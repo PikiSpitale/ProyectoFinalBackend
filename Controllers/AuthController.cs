@@ -16,18 +16,20 @@ public sealed class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<UserResponse>> Register(
+    public async Task<ActionResult<AuthResponse>> Register(
         RegisterRequest request,
         CancellationToken cancellationToken
     )
     {
         try
         {
-            var user = await _authService.RegisterAsync(request, cancellationToken);
-            return StatusCode(StatusCodes.Status201Created, user);
+            // O bien RegisterAsync devuelve directamente el AuthResponse con el token,
+            // o tu servicio realiza el registro y genera el token al instante.
+            var authResponse = await _authService.RegisterAsync(request, cancellationToken);
+            return StatusCode(StatusCodes.Status201Created, authResponse);
         }
         catch (DuplicateUserException)
         {

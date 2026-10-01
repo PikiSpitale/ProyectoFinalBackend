@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using System.Linq;
 
 namespace ProyectAPI.Services;
 
@@ -21,7 +22,7 @@ public sealed class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    public async Task<UserResponse> RegisterAsync(
+    public async Task<AuthResponse> RegisterAsync(
         RegisterRequest request,
         CancellationToken cancellationToken
     )
@@ -42,6 +43,17 @@ public sealed class AuthService : IAuthService
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12)
         };
 
+        // Si mandó juegos en el registro, los mapeamos y guardamos
+        if (request.Games != null && request.Games.Any())
+        {
+            user.Games = request.Games.Select(g => new UserGame
+            {
+                GameName = g.GameName,
+                InGameName = g.InGameName,
+                Rank = g.Rank
+            }).ToList();
+        }
+
         try
         {
             await _userRepository.CreateAsync(user, cancellationToken);
@@ -52,13 +64,11 @@ public sealed class AuthService : IAuthService
             throw new DuplicateUserException();
         }
 
-        return new UserResponse(
-            user.Id,
-            user.Username,
-            user.Email,
-            user.Role,
-            user.CreatedAt
-        );
+        // Generamos el token JWT automáticamente tras registrarse con éxito
+        var token = GenerateJwtToken(user);
+        var userResponse = new UserResponse(user.Id, user.Username, user.Email, user.Role, user.CreatedAt);
+
+        return new AuthResponse(token, userResponse);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
@@ -71,7 +81,15 @@ public sealed class AuthService : IAuthService
             throw new InvalidCredentialsException();
         }
 
-        // Generar Token JWT
+        var token = GenerateJwtToken(user);
+        var userResponse = new UserResponse(user.Id, user.Username, user.Email, user.Role, user.CreatedAt);
+
+        return new AuthResponse(token, userResponse);
+    }
+
+    // Método privado auxiliar para no duplicar la creación del Token JWT
+    private string GenerateJwtToken(User user)
+    {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -89,11 +107,7 @@ public sealed class AuthService : IAuthService
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        var jwt = tokenHandler.WriteToken(token);
-
-        var userResponse = new UserResponse(user.Id, user.Username, user.Email, user.Role, user.CreatedAt);
-
-        return new AuthResponse(jwt, userResponse);
+        return tokenHandler.WriteToken(token);
     }
 }
 

@@ -3,36 +3,32 @@
   "WorkspaceRootPath": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\dtos\\loginrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:dtos\\loginrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\dtos\\authresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:dtos\\authresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\services\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:services\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\proyectapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:proyectapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\dtos\\addgamerequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:dtos\\addgamerequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\dtos\\registerrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:dtos\\registerrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,7 +38,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -50,104 +46,88 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "IAuthService.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\IAuthService.cs",
-              "RelativeDocumentMoniker": "Services\\IAuthService.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\IAuthService.cs",
-              "RelativeToolTip": "Services\\IAuthService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-29T17:15:02.456Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "AuthService.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\AuthService.cs",
               "RelativeDocumentMoniker": "Services\\AuthService.cs",
               "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\AuthService.cs",
               "RelativeToolTip": "Services\\AuthService.cs",
-              "ViewState": "AgIAAF8AAAAAAAAAAAAYwGkAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAE8AAAAAAAAAAAAAAHcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-29T17:14:46.587Z",
+              "WhenOpened": "2026-10-01T21:00:25.027Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "AuthResponse.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\AuthResponse.cs",
-              "RelativeDocumentMoniker": "DTOs\\AuthResponse.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\AuthResponse.cs",
-              "RelativeToolTip": "DTOs\\AuthResponse.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAACAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "IAuthService.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\IAuthService.cs",
+              "RelativeDocumentMoniker": "Services\\IAuthService.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\IAuthService.cs",
+              "RelativeToolTip": "Services\\IAuthService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-29T17:14:01.995Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\appsettings.json",
-              "RelativeDocumentMoniker": "appsettings.json",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\appsettings.json",
-              "RelativeToolTip": "appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-09-29T17:12:54.098Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "AuthController.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\AuthController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\AuthController.cs",
-              "RelativeToolTip": "Controllers\\AuthController.cs",
-              "ViewState": "AgIAACkAAAAAAAAAAAAwwDoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-29T00:46:37.842Z",
+              "WhenOpened": "2026-10-01T20:59:43.217Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "UserRepository.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\UserRepository.cs",
-              "RelativeDocumentMoniker": "Repositories\\UserRepository.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\UserRepository.cs",
-              "RelativeToolTip": "Repositories\\UserRepository.cs",
-              "ViewState": "AgIAAEQAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAAADwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-29T00:44:00.88Z",
+              "WhenOpened": "2026-10-01T20:59:04.323Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ProyectAPI.csproj",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\ProyectAPI.csproj",
+              "RelativeDocumentMoniker": "ProyectAPI.csproj",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\ProyectAPI.csproj",
+              "RelativeToolTip": "ProyectAPI.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-01T18:37:34.669Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "RegisterRequest.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\RegisterRequest.cs",
+              "RelativeDocumentMoniker": "DTOs\\RegisterRequest.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\RegisterRequest.cs",
+              "RelativeToolTip": "DTOs\\RegisterRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-01T18:03:15.406Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AddGameRequest.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\AddGameRequest.cs",
+              "RelativeDocumentMoniker": "DTOs\\AddGameRequest.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\AddGameRequest.cs",
+              "RelativeToolTip": "DTOs\\AddGameRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-01T18:01:01.513Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "LoginRequest.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\LoginRequest.cs",
-              "RelativeDocumentMoniker": "DTOs\\LoginRequest.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\LoginRequest.cs",
-              "RelativeToolTip": "DTOs\\LoginRequest.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-29T00:42:40.393Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAAGkAAAA+AAAAAAAAAA==",
+              "ViewState": "AgIAAGoAAAAAAAAAAADwv44AAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-29T00:41:30.333Z",
               "EditorCaption": ""

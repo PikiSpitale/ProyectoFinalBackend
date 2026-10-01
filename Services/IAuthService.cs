@@ -4,7 +4,7 @@ namespace ProyectAPI.Services;
 
 public interface IAuthService
 {
-    Task<UserResponse> RegisterAsync(
+    Task<AuthResponse> RegisterAsync(
         RegisterRequest request,
         CancellationToken cancellationToken
     );
