@@ -64,20 +64,20 @@ public sealed class UserRepository : IUserRepository
         return user;
     }
 
-    public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
     {
-        return _users.Find(user => user.Email == email).FirstOrDefaultAsync(cancellationToken);
+        return await _users.Find(user => user.Email == email).FirstOrDefaultAsync(cancellationToken);
     }
 
-    // --- NUEVOS MÉTODOS PARA EL PERFIL ---
+    // --- MÉTODOS PARA EL PERFIL ---
 
-    public Task<User?> GetByIdAsync(string id, CancellationToken cancellationToken)
+    public async Task<User?> GetByIdAsync(string id, CancellationToken cancellationToken)
     {
-        return _users.Find(user => user.Id == id).FirstOrDefaultAsync(cancellationToken);
+        return await _users.Find(user => user.Id == id).FirstOrDefaultAsync(cancellationToken);
     }
 
-    public Task UpdateAsync(User user, CancellationToken cancellationToken)
+    public async Task UpdateAsync(User user, CancellationToken cancellationToken)
     {
-        return _users.ReplaceOneAsync(u => u.Id == user.Id, user, cancellationToken: cancellationToken);
+        await _users.ReplaceOneAsync(u => u.Id == user.Id, user, cancellationToken: cancellationToken);
     }
 }

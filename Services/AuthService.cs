@@ -40,7 +40,14 @@ public sealed class AuthService : IAuthService
         {
             Username = username,
             Email = email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12),
+            CreatedAt = DateTime.UtcNow,
+            // Inicializamos las estadísticas por defecto para los nuevos usuarios
+            Stats = new UserStats
+            {
+                MatchesPlayed = 0,
+                Winrate = 0
+            }
         };
 
         // Si mandó juegos en el registro, los mapeamos y guardamos
