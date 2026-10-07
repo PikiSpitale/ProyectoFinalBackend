@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using ProyectAPI.Infrastructure;
@@ -8,16 +7,6 @@ using ProyectAPI.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// DEBUG: mostrar valores efectivos de la sección MongoDbSettings (temporal)
-var section = builder.Configuration.GetSection(MongoDbSettings.SectionName);
-var effectiveSettings = section.Get<MongoDbSettings>() ?? new MongoDbSettings();
-string maskedConn = string.IsNullOrWhiteSpace(effectiveSettings.ConnectionString)
-    ? "<vacío>"
-    : $"[length={effectiveSettings.ConnectionString.Length}]";
-Console.WriteLine($"[DEBUG] MongoDbSettings.Section: {MongoDbSettings.SectionName}");
-Console.WriteLine($"[DEBUG] ConnectionString: {maskedConn}");
-Console.WriteLine($"[DEBUG] DatabaseName: {(string.IsNullOrWhiteSpace(effectiveSettings.DatabaseName) ? "<vacío>" : effectiveSettings.DatabaseName)}");
 
 // Configuración de tu base de datos
 builder.Services
@@ -34,7 +23,8 @@ builder.Services
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-
+builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
+builder.Services.AddScoped<ITournamentService, TournamentService>();
 builder.Services.AddControllers();
 
 // Configuración de CORS para el Frontend
@@ -54,11 +44,11 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Pega tu Token JWT aquí."
+        Description = "Introduce 'Bearer' [espacio] y luego tu token."
     });
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -99,14 +89,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(); // Limpio y funcionando con Swashbuckle
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
 // Activar CORS (Debe ir antes de autenticación y controladores)
 app.UseCors("AllowFrontend");
-
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -139,5 +128,4 @@ app.MapGet(
 );
 
 app.MapControllers();
-
 app.Run();
