@@ -21,10 +21,16 @@ builder.Services
     .ValidateOnStart();
 
 builder.Services.AddSingleton<MongoDbContext>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
 builder.Services.AddScoped<ITournamentService, TournamentService>();
+
+// Registro de dependencias para el Módulo de Equipos
+builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<TeamService>();
+
 builder.Services.AddControllers();
 
 // Configuración de CORS para el Frontend
@@ -96,6 +102,7 @@ app.UseHttpsRedirection();
 
 // Activar CORS (Debe ir antes de autenticación y controladores)
 app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -128,4 +135,5 @@ app.MapGet(
 );
 
 app.MapControllers();
+
 app.Run();

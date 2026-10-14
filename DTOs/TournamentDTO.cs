@@ -7,7 +7,9 @@
         decimal PrizePool,
         int MaxParticipants,
         string Rules,
-        string RankConditions
+        string RankConditions,
+        DateTime StartDate,
+        DateTime EndDate
     );
 
     public record TournamentResponse(
@@ -20,6 +22,8 @@
         int MaxParticipants,
         string Rules,
         string RankConditions,
+        DateTime StartDate,
+        DateTime EndDate,
         List<TournamentParticipantDto> Participants
     );
 

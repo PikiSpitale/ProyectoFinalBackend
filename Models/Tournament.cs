@@ -19,9 +19,13 @@ namespace ProyectAPI.Models
         public string Rules { get; set; } = string.Empty;
         public string RankConditions { get; set; } = string.Empty;
 
+        // Nuevas propiedades de fechas para el torneo
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+
         public List<TournamentParticipant> Participants { get; set; } = new();
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // 🌟 Corregido aquí
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 
     public class TournamentParticipant

@@ -3,40 +3,72 @@
   "WorkspaceRootPath": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\repositories\\tournamentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:repositories\\tournamentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\controllers\\tournamentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:controllers\\tournamentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\dtos\\addgamerequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:dtos\\addgamerequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\services\\tournamentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:services\\tournamentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\dtos\\registerrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:dtos\\registerrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\services\\itournamentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:services\\itournamentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\dtos\\tournamentdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:dtos\\tournamentdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\repositories\\itournamentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:repositories\\itournamentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\models\\team.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:models\\team.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\models\\teammember.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:models\\teammember.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\models\\tournament.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:models\\tournament.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\dtos\\tournamentdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:dtos\\tournamentdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\models\\userstats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:models\\userstats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\repositories\\iteamrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:repositories\\iteamrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\repositories\\itournamentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:repositories\\itournamentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\repositories\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:repositories\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\repositories\\tournamentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:repositories\\tournamentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\services\\itournamentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:services\\itournamentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\services\\tournamentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:services\\tournamentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -46,111 +78,193 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 10,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\UserController.cs",
+              "RelativeDocumentMoniker": "Controllers\\UserController.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\UserController.cs",
+              "RelativeToolTip": "Controllers\\UserController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:45:32.373Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AddGameRequest.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\AddGameRequest.cs",
+              "RelativeDocumentMoniker": "DTOs\\AddGameRequest.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\AddGameRequest.cs",
+              "RelativeToolTip": "DTOs\\AddGameRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:45:18.629Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "RegisterRequest.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\RegisterRequest.cs",
+              "RelativeDocumentMoniker": "DTOs\\RegisterRequest.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\RegisterRequest.cs",
+              "RelativeToolTip": "DTOs\\RegisterRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:45:01.846Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Team.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\Team.cs",
+              "RelativeDocumentMoniker": "Models\\Team.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\Team.cs",
+              "RelativeToolTip": "Models\\Team.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:44:36.609Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "TeamMember.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\TeamMember.cs",
+              "RelativeDocumentMoniker": "Models\\TeamMember.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\TeamMember.cs",
+              "RelativeToolTip": "Models\\TeamMember.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:44:27.416Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\User.cs",
+              "RelativeDocumentMoniker": "Models\\User.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\User.cs",
+              "RelativeToolTip": "Models\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:44:12.313Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "UserStats.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\UserStats.cs",
+              "RelativeDocumentMoniker": "Models\\UserStats.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\UserStats.cs",
+              "RelativeToolTip": "Models\\UserStats.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:44:02.831Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ITeamRepository.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\ITeamRepository.cs",
+              "RelativeDocumentMoniker": "Repositories\\ITeamRepository.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\ITeamRepository.cs",
+              "RelativeToolTip": "Repositories\\ITeamRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:43:48.822Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "IUserRepository.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\IUserRepository.cs",
+              "RelativeDocumentMoniker": "Repositories\\IUserRepository.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\IUserRepository.cs",
+              "RelativeToolTip": "Repositories\\IUserRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:43:39.969Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\appsettings.json",
-              "RelativeDocumentMoniker": "appsettings.json",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\appsettings.json",
-              "RelativeToolTip": "appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-10-07T17:49:15.73Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ITournamentService.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\ITournamentService.cs",
-              "RelativeDocumentMoniker": "Services\\ITournamentService.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\ITournamentService.cs",
-              "RelativeToolTip": "Services\\ITournamentService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-06T17:25:54.979Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAGAAAAAAAAAAAAAgwIIAAAAKAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-06T17:17:50.88Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "ITournamentRepository.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\ITournamentRepository.cs",
-              "RelativeDocumentMoniker": "Repositories\\ITournamentRepository.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\ITournamentRepository.cs",
-              "RelativeToolTip": "Repositories\\ITournamentRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-06T17:15:55.459Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "TournamentController.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\TournamentController.cs",
               "RelativeDocumentMoniker": "Controllers\\TournamentController.cs",
               "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\TournamentController.cs",
               "RelativeToolTip": "Controllers\\TournamentController.cs",
-              "ViewState": "AgIAABoAAAAAAAAAAAAqwCwAAACVAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAE4AAABfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-06T17:14:30.813Z",
+              "WhenOpened": "2026-10-14T17:52:08.903Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ITournamentService.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\ITournamentService.cs",
+              "RelativeDocumentMoniker": "Services\\ITournamentService.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\ITournamentService.cs",
+              "RelativeToolTip": "Services\\ITournamentService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:26:17.646Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ITournamentRepository.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\ITournamentRepository.cs",
+              "RelativeDocumentMoniker": "Repositories\\ITournamentRepository.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\ITournamentRepository.cs",
+              "RelativeToolTip": "Repositories\\ITournamentRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:26:02.419Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "TournamentService.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\TournamentService.cs",
-              "RelativeDocumentMoniker": "Services\\TournamentService.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\TournamentService.cs",
-              "RelativeToolTip": "Services\\TournamentService.cs",
-              "ViewState": "AgIAAFQAAAAAAAAAAAAmwHAAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-06T17:14:16.994Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "TournamentRepository.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\TournamentRepository.cs",
-              "RelativeDocumentMoniker": "Repositories\\TournamentRepository.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\TournamentRepository.cs",
-              "RelativeToolTip": "Repositories\\TournamentRepository.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAswBYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-06T17:13:47.538Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
               "Title": "TournamentDTO.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\TournamentDTO.cs",
               "RelativeDocumentMoniker": "DTOs\\TournamentDTO.cs",
               "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\TournamentDTO.cs",
               "RelativeToolTip": "DTOs\\TournamentDTO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-06T17:12:08.517Z"
+              "WhenOpened": "2026-10-14T18:21:03.569Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Program.cs*",
+              "RelativeToolTip": "Program.cs*",
+              "ViewState": "AgIAAGwAAAAAAAAAAAAAAB0AAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:31:28.305Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -160,9 +274,36 @@
               "RelativeDocumentMoniker": "Models\\Tournament.cs",
               "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\Tournament.cs",
               "RelativeToolTip": "Models\\Tournament.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAgwBMAAABCAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-06T17:11:50.493Z"
+              "WhenOpened": "2026-10-14T17:54:16.097Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "TournamentService.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\TournamentService.cs",
+              "RelativeDocumentMoniker": "Services\\TournamentService.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\TournamentService.cs",
+              "RelativeToolTip": "Services\\TournamentService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAF8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T17:52:02.672Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "TournamentRepository.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\TournamentRepository.cs",
+              "RelativeDocumentMoniker": "Repositories\\TournamentRepository.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\TournamentRepository.cs",
+              "RelativeToolTip": "Repositories\\TournamentRepository.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAowDQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T17:40:47.971Z",
+              "EditorCaption": ""
             }
           ]
         }

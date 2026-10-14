@@ -21,6 +21,5 @@ public sealed class RegisterRequest
     [Compare(nameof(Password), ErrorMessage = "Las contraseñas no coinciden.")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
-    // NUEVO: Lista opcional de videojuegos al registrarse
     public List<AddGameRequest>? Games { get; set; }
 }

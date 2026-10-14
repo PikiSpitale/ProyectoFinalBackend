@@ -30,16 +30,21 @@ public sealed class ProfileController : ControllerBase
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         if (user == null) return NotFound("Usuario no encontrado.");
 
+        user.LastActive = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user, cancellationToken);
+
         // Retornamos los datos limpios que consumirá React (incluyendo juegos, avatar y estadísticas)
         return Ok(new
         {
+            Id = user.Id,
             user.Username,
             user.Email,
             user.Role,
             user.CreatedAt,
             user.Games,
             user.Stats,
-            AvatarUrl = user.AvatarUrl
+            AvatarUrl = user.AvatarUrl,
+            user.LastActive
         });
     }
 

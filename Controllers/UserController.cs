@@ -15,7 +15,7 @@ public class UsersController : ControllerBase
 
     public UsersController(IMongoDatabase database)
     {
-        _usersCollection = database.GetCollection<User>("Users"); // Asegúrate de que el nombre de tu colección sea "Users" o el que uses
+        _usersCollection = database.GetCollection<User>("Users"); 
     }
 
     [HttpGet("me")]

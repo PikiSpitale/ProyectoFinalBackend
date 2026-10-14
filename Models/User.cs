@@ -22,6 +22,9 @@ public sealed class User
 
     public bool IsActive { get; set; } = true;
 
+    // Campo para registrar la última actividad del usuario (Heartbeat)
+    public DateTime LastActive { get; set; } = DateTime.UtcNow;
+
     // Campo para guardar la URL de la foto de perfil del usuario
     public string AvatarUrl { get; set; } = string.Empty;
 
