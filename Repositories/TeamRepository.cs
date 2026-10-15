@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using ProyectAPI.Infrastructure;
 using ProyectAPI.Models;
 
@@ -9,12 +8,10 @@ namespace ProyectAPI.Repositories
     {
         private readonly IMongoCollection<Team> _teamsCollection;
 
-        // Constructor original de tu repositorio
-        public TeamRepository(IOptions<MongoDbSettings> mongoDBSettings)
+        // Usa el MongoDbContext compartido (singleton), igual que TournamentRepository
+        public TeamRepository(MongoDbContext mongoDbContext)
         {
-            var client = new MongoClient(mongoDBSettings.Value.ConnectionString);
-            var database = client.GetDatabase(mongoDBSettings.Value.DatabaseName);
-            _teamsCollection = database.GetCollection<Team>("Teams");
+            _teamsCollection = mongoDbContext.Database.GetCollection<Team>("Teams");
         }
 
         // Obtener todos los equipos

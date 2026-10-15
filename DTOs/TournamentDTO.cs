@@ -32,6 +32,12 @@
         string Username,
         string InGameName,
         string Rank,
-        DateTime RegisteredAt
+        DateTime RegisteredAt,
+        bool IsDisqualified = false,
+        string? DisqualificationReason = null
+    );
+
+    public record DisqualifyRequest(
+        string? Reason
     );
 }

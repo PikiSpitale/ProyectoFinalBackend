@@ -35,5 +35,9 @@ namespace ProyectAPI.Models
         public string InGameName { get; set; } = string.Empty;
         public string Rank { get; set; } = string.Empty;
         public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
+
+        // Un moderador puede descalificar a un jugador que no cumple las condiciones
+        public bool IsDisqualified { get; set; } = false;
+        public string? DisqualificationReason { get; set; }
     }
 }
