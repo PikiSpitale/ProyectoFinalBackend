@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using ProyectAPI.DTOs;
 using ProyectAPI.Models;
 using ProyectAPI.Repositories;
@@ -40,6 +41,35 @@ public sealed class ProfileController : ControllerBase
             user.Username,
             user.Email,
             user.Role,
+            user.CreatedAt,
+            user.Games,
+            user.Stats,
+            AvatarUrl = user.AvatarUrl,
+            user.LastActive
+        });
+    }
+
+    // Perfil público de otro usuario (sin email ni rol)
+    [HttpGet("{id}")]
+    public async Task<ActionResult> GetUserProfile(string id, CancellationToken cancellationToken)
+    {
+        // Si el ID no tiene formato válido de ObjectId, evitamos consultar la base
+        if (!ObjectId.TryParse(id, out _))
+        {
+            return NotFound(new { message = "Usuario no encontrado." });
+        }
+
+        var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+        if (user == null)
+        {
+            return NotFound(new { message = "Usuario no encontrado." });
+        }
+
+        // Solo datos públicos
+        return Ok(new
+        {
+            Id = user.Id,
+            user.Username,
             user.CreatedAt,
             user.Games,
             user.Stats,
