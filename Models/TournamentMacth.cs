@@ -32,6 +32,9 @@ namespace ProyectAPI.Models
 
         // True si se ganó porque el rival fue descalificado
         public bool IsWalkover { get; set; }
+        // Estadísticas de cada jugador en este partido (clave = estadística del juego, ej. "kills")
+        public Dictionary<string, int> StatsA { get; set; } = new();
+        public Dictionary<string, int> StatsB { get; set; } = new();
 
         public string Status { get; set; } = MatchStatuses.Pending;
     }

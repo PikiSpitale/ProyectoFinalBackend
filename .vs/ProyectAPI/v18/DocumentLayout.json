@@ -3,6 +3,34 @@
   "WorkspaceRootPath": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\controllers\\matchescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:controllers\\matchescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\services\\matchstatsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:services\\matchstatsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\services\\imatchstatsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:services\\imatchstatsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\services\\gamestatscatalog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:services\\gamestatscatalog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\dtos\\matchstatsdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:dtos\\matchstatsdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\models\\tournamentmacth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:models\\tournamentmacth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\controllers\\tournamentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:controllers\\tournamentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -39,10 +67,6 @@
       "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:services\\gamerules.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\models\\tournamentmacth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:models\\tournamentmacth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\models\\tournament.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:models\\tournament.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -57,10 +81,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\models\\approles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:models\\approles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F2136337-4908-4FF6-81CD-8C6739BA437B}|ProyectAPI.csproj|c:\\users\\escob\\onedrive\\escritorio\\proyectofinalbackend\\services\\bracketschedulerservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -130,33 +150,72 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "MatchDTO.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\MatchDTO.cs",
-              "RelativeDocumentMoniker": "DTOs\\MatchDTO.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\MatchDTO.cs",
-              "RelativeToolTip": "DTOs\\MatchDTO.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAYwCUAAAABAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "MatchesController.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\MatchesController.cs",
+              "RelativeDocumentMoniker": "Controllers\\MatchesController.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\MatchesController.cs",
+              "RelativeToolTip": "Controllers\\MatchesController.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAzwC0AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-15T19:07:25.969Z",
+              "WhenOpened": "2026-10-16T02:04:08.943Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "TournamentDTO.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\TournamentDTO.cs",
-              "RelativeDocumentMoniker": "DTOs\\TournamentDTO.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\TournamentDTO.cs",
-              "RelativeToolTip": "DTOs\\TournamentDTO.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAYwCoAAAABAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "MatchStatsService.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\MatchStatsService.cs",
+              "RelativeDocumentMoniker": "Services\\MatchStatsService.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\MatchStatsService.cs",
+              "RelativeToolTip": "Services\\MatchStatsService.cs",
+              "ViewState": "AgIAAF0AAAAAAAAAAAAmwG4AAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T18:21:03.569Z",
+              "WhenOpened": "2026-10-16T02:03:50.286Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IMatchStatsService.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\IMatchStatsService.cs",
+              "RelativeDocumentMoniker": "Services\\IMatchStatsService.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\IMatchStatsService.cs",
+              "RelativeToolTip": "Services\\IMatchStatsService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-16T02:03:32.784Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "GameStatsCatalog.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\GameStatsCatalog.cs",
+              "RelativeDocumentMoniker": "Services\\GameStatsCatalog.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\GameStatsCatalog.cs",
+              "RelativeToolTip": "Services\\GameStatsCatalog.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAYwD4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-16T02:03:04.056Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
+              "Title": "MatchStatsDTO.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\MatchStatsDTO.cs",
+              "RelativeDocumentMoniker": "DTOs\\MatchStatsDTO.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\MatchStatsDTO.cs",
+              "RelativeToolTip": "DTOs\\MatchStatsDTO.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAYwCMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-16T02:02:37.063Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
               "Title": "BracketGenerator.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\BracketGenerator.cs",
               "RelativeDocumentMoniker": "Services\\BracketGenerator.cs",
@@ -164,12 +223,11 @@
               "RelativeToolTip": "Services\\BracketGenerator.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAABeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-15T19:08:42.865Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-15T19:08:42.865Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 11,
               "Title": "ITournamentRepository.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\ITournamentRepository.cs",
               "RelativeDocumentMoniker": "Repositories\\ITournamentRepository.cs",
@@ -177,12 +235,36 @@
               "RelativeToolTip": "Repositories\\ITournamentRepository.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T18:26:02.419Z",
+              "WhenOpened": "2026-10-14T18:26:02.419Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAYwCAAAABEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:31:28.305Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 13,
+              "Title": "TournamentDTO.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\TournamentDTO.cs",
+              "RelativeDocumentMoniker": "DTOs\\TournamentDTO.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\TournamentDTO.cs",
+              "RelativeToolTip": "DTOs\\TournamentDTO.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAYwCoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-14T18:21:03.569Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
               "Title": "TournamentRepository.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\TournamentRepository.cs",
               "RelativeDocumentMoniker": "Repositories\\TournamentRepository.cs",
@@ -190,12 +272,11 @@
               "RelativeToolTip": "Repositories\\TournamentRepository.cs",
               "ViewState": "AgIAAD4AAAAAAAAAAAAYwF8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T17:40:47.971Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-14T17:40:47.971Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 9,
               "Title": "ITournamentService.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\ITournamentService.cs",
               "RelativeDocumentMoniker": "Services\\ITournamentService.cs",
@@ -203,12 +284,11 @@
               "RelativeToolTip": "Services\\ITournamentService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T18:26:17.646Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-14T18:26:17.646Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 8,
               "Title": "TournamentService.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\TournamentService.cs",
               "RelativeDocumentMoniker": "Services\\TournamentService.cs",
@@ -216,25 +296,49 @@
               "RelativeToolTip": "Services\\TournamentService.cs",
               "ViewState": "AgIAAMkBAAAAAAAAAAAYwOoBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T17:52:02.672Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-14T17:52:02.672Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 7,
               "Title": "TournamentController.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\TournamentController.cs",
               "RelativeDocumentMoniker": "Controllers\\TournamentController.cs",
               "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\TournamentController.cs",
               "RelativeToolTip": "Controllers\\TournamentController.cs",
-              "ViewState": "AgIAAIMAAAAAAAAAAAAYwKQAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAIQAAAAAAAAAAAAuwKQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-10-14T17:52:08.903Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 6,
+              "Title": "TournamentMacth.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\TournamentMacth.cs",
+              "RelativeDocumentMoniker": "Models\\TournamentMacth.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\TournamentMacth.cs",
+              "RelativeToolTip": "Models\\TournamentMacth.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAgwCQAAABEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-15T19:07:02.864Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "MatchDTO.cs",
+              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\MatchDTO.cs",
+              "RelativeDocumentMoniker": "DTOs\\MatchDTO.cs",
+              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\MatchDTO.cs",
+              "RelativeToolTip": "DTOs\\MatchDTO.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAYwCUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-15T19:07:25.969Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
               "Title": "GameRules.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\GameRules.cs",
               "RelativeDocumentMoniker": "Services\\GameRules.cs",
@@ -242,25 +346,11 @@
               "RelativeToolTip": "Services\\GameRules.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-15T19:44:28.792Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-15T19:44:28.792Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "TournamentMacth.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\TournamentMacth.cs",
-              "RelativeDocumentMoniker": "Models\\TournamentMacth.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\TournamentMacth.cs",
-              "RelativeToolTip": "Models\\TournamentMacth.cs",
-              "ViewState": "AgIAABkAAAAAAAAAAAAzwDoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-15T19:07:02.864Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 17,
               "Title": "MatchRepository.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\MatchRepository.cs",
               "RelativeDocumentMoniker": "Repositories\\MatchRepository.cs",
@@ -268,12 +358,11 @@
               "RelativeToolTip": "Repositories\\MatchRepository.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAYwCQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-15T19:08:16.665Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-15T19:08:16.665Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 18,
               "Title": "IMatchRepository.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\IMatchRepository.cs",
               "RelativeDocumentMoniker": "Repositories\\IMatchRepository.cs",
@@ -281,12 +370,11 @@
               "RelativeToolTip": "Repositories\\IMatchRepository.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-15T19:07:57.277Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-15T19:07:57.277Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 16,
               "Title": "Tournament.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\Tournament.cs",
               "RelativeDocumentMoniker": "Models\\Tournament.cs",
@@ -294,12 +382,11 @@
               "RelativeToolTip": "Models\\Tournament.cs",
               "ViewState": "AgIAAAkAAAAAAAAAAAAzwCoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T17:54:16.097Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-14T17:54:16.097Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 19,
               "Title": "AppRoles.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\AppRoles.cs",
               "RelativeDocumentMoniker": "Models\\AppRoles.cs",
@@ -307,12 +394,11 @@
               "RelativeToolTip": "Models\\AppRoles.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-15T19:23:07.461Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-15T19:23:07.461Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 20,
               "Title": "BracketSchedulerService.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Services\\BracketSchedulerService.cs",
               "RelativeDocumentMoniker": "Services\\BracketSchedulerService.cs",
@@ -320,25 +406,11 @@
               "RelativeToolTip": "Services\\BracketSchedulerService.cs",
               "ViewState": "AgIAABoAAAAAAAAAAAAYwDsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-15T19:09:13.5Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-15T19:09:13.5Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAHwAAAAAAAAAAAAYwJ0AAAAKAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T18:31:28.305Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 21,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\User.cs",
               "RelativeDocumentMoniker": "Models\\User.cs",
@@ -346,12 +418,11 @@
               "RelativeToolTip": "Models\\User.cs",
               "ViewState": "AgIAAAoAAAAAAAAAAAAqwB0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T18:44:12.313Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-14T18:44:12.313Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 23,
               "Title": "ITeamRepository.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\ITeamRepository.cs",
               "RelativeDocumentMoniker": "Repositories\\ITeamRepository.cs",
@@ -359,12 +430,11 @@
               "RelativeToolTip": "Repositories\\ITeamRepository.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T18:43:48.822Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-14T18:43:48.822Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 31,
               "Title": "UserStats.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\UserStats.cs",
               "RelativeDocumentMoniker": "Models\\UserStats.cs",
@@ -376,7 +446,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 25,
               "Title": "TeamMember.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\TeamMember.cs",
               "RelativeDocumentMoniker": "Models\\TeamMember.cs",
@@ -384,12 +454,11 @@
               "RelativeToolTip": "Models\\TeamMember.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T18:44:27.416Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-14T18:44:27.416Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 22,
               "Title": "Team.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Models\\Team.cs",
               "RelativeDocumentMoniker": "Models\\Team.cs",
@@ -397,12 +466,11 @@
               "RelativeToolTip": "Models\\Team.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T18:44:36.609Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-14T18:44:36.609Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 30,
               "Title": "RegisterRequest.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\RegisterRequest.cs",
               "RelativeDocumentMoniker": "DTOs\\RegisterRequest.cs",
@@ -414,7 +482,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 28,
               "Title": "UserController.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\UserController.cs",
               "RelativeDocumentMoniker": "Controllers\\UserController.cs",
@@ -426,7 +494,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 27,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
@@ -438,7 +506,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 24,
               "Title": "TeamRepository.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\TeamRepository.cs",
               "RelativeDocumentMoniker": "Repositories\\TeamRepository.cs",
@@ -446,12 +514,11 @@
               "RelativeToolTip": "Repositories\\TeamRepository.cs",
               "ViewState": "AgIAAA8AAAAAAAAAAAAIwCYAAABbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-15T16:35:21.201Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-15T16:35:21.201Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 26,
               "Title": "ProfileControllers.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Controllers\\ProfileControllers.cs",
               "RelativeDocumentMoniker": "Controllers\\ProfileControllers.cs",
@@ -459,12 +526,11 @@
               "RelativeToolTip": "Controllers\\ProfileControllers.cs",
               "ViewState": "AgIAAIEAAAAAAAAAAAAmwJoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-10-14T23:47:18.609Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-14T23:47:18.609Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 32,
               "Title": "IUserRepository.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\Repositories\\IUserRepository.cs",
               "RelativeDocumentMoniker": "Repositories\\IUserRepository.cs",
@@ -476,7 +542,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 29,
               "Title": "AddGameRequest.cs",
               "DocumentMoniker": "C:\\Users\\escob\\OneDrive\\Escritorio\\ProyectoFinalBackend\\DTOs\\AddGameRequest.cs",
               "RelativeDocumentMoniker": "DTOs\\AddGameRequest.cs",

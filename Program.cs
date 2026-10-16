@@ -30,6 +30,7 @@ builder.Services.AddScoped<ITournamentService, TournamentService>();
 // Registro de dependencias para el Módulo de Competencia (llaves y enfrentamientos)
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddHostedService<BracketSchedulerService>();
+builder.Services.AddScoped<IMatchStatsService, MatchStatsService>();
 
 // Registro de dependencias para el Módulo de Equipos
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
