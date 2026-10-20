@@ -4,10 +4,9 @@
     {
         public string UserId { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
-        public string Role { get; set; } = "Member";
+        public string Role { get; set; } = "Member"; // Ej: Roster, Analista, etc.
+        public bool IsStarter { get; set; } = true;  // True = Titular, False = Suplente (RF-15)
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
-
-        // Propiedad para el sistema de estado online/offline
         public DateTime LastActive { get; set; } = DateTime.UtcNow;
     }
 }

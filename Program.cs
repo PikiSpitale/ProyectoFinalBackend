@@ -36,6 +36,9 @@ builder.Services.AddScoped<IMatchStatsService, MatchStatsService>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<TeamService>();
 
+// Registro de dependencias para el Módulo de Rankings
+builder.Services.AddScoped<RankingService>();
+
 builder.Services.AddControllers();
 
 // Configuración de CORS para el Frontend

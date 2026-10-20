@@ -18,7 +18,6 @@ namespace ProyectAPI.Controllers
             _teamService = teamService;
         }
 
-        // Endpoint para obtener todos los equipos
         [HttpGet]
         public async Task<ActionResult<List<Team>>> GetAll(CancellationToken cancellationToken)
         {
@@ -26,7 +25,6 @@ namespace ProyectAPI.Controllers
             return Ok(teams);
         }
 
-        // Endpoint para obtener un equipo por ID
         [HttpGet("{id}")]
         public async Task<ActionResult<Team>> GetById(string id, CancellationToken cancellationToken)
         {
@@ -35,7 +33,6 @@ namespace ProyectAPI.Controllers
             return Ok(team);
         }
 
-        // Endpoint para crear un equipo
         [HttpPost]
         [Authorize]
         public async Task<ActionResult<Team>> Create([FromBody] TeamCreateDto dto, CancellationToken cancellationToken)
@@ -59,7 +56,6 @@ namespace ProyectAPI.Controllers
             }
         }
 
-        // Endpoint para unirse a un equipo
         [HttpPost("{id}/join")]
         [Authorize]
         public async Task<ActionResult> JoinTeam(string id, CancellationToken cancellationToken)
@@ -85,7 +81,6 @@ namespace ProyectAPI.Controllers
             }
         }
 
-        // Endpoint para abandonar un equipo
         [HttpPost("{id}/leave")]
         [Authorize]
         public async Task<ActionResult> LeaveTeam(string id, CancellationToken cancellationToken)
@@ -102,6 +97,66 @@ namespace ProyectAPI.Controllers
                 if (!success) return BadRequest(new { message = "No se pudo abandonar el equipo." });
 
                 return Ok(new { message = "Has abandonado el equipo exitosamente." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // RF-10: Actualizar información del equipo
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task<ActionResult> UpdateTeam(string id, [FromBody] UpdateTeamDto dto, CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            try
+            {
+                var success = await _teamService.UpdateTeamAsync(id, dto, userId, cancellationToken);
+                if (!success) return NotFound(new { message = "Equipo no encontrado" });
+                return Ok(new { message = "Equipo actualizado correctamente" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // RF-13: Expulsar miembro
+        [HttpDelete("{id}/members/{memberUserId}")]
+        [Authorize]
+        public async Task<ActionResult> RemoveMember(string id, string memberUserId, CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            try
+            {
+                var success = await _teamService.RemoveMemberAsync(id, memberUserId, userId, cancellationToken);
+                if (!success) return NotFound(new { message = "No se pudo completar la operación" });
+                return Ok(new { message = "Integrante eliminado del equipo" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // RF-14 y RF-15: Cambiar rol o estado titular/suplente
+        [HttpPut("{id}/members/{memberUserId}")]
+        [Authorize]
+        public async Task<ActionResult> UpdateMemberRole(string id, string memberUserId, [FromBody] UpdateMemberRoleDto dto, CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            try
+            {
+                var success = await _teamService.UpdateMemberRoleAsync(id, memberUserId, dto.Role, dto.IsStarter, userId, cancellationToken);
+                if (!success) return NotFound(new { message = "No se pudo actualizar el miembro" });
+                return Ok(new { message = "Rol y estado actualizados" });
             }
             catch (InvalidOperationException ex)
             {

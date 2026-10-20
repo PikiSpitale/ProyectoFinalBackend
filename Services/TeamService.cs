@@ -9,18 +9,15 @@ namespace ProyectAPI.Services
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
 
-        // Constructor con repositorios inyectados
         public TeamService(ITeamRepository teamRepository, IUserRepository userRepository)
         {
             _teamRepository = teamRepository;
             _userRepository = userRepository;
         }
 
-        // Obtener lista completa de equipos
         public async Task<List<Team>> GetAllTeamsAsync(CancellationToken cancellationToken) =>
             await _teamRepository.GetAllAsync(cancellationToken);
 
-        // Obtener equipo por ID actualizando el estado de actividad de los miembros
         public async Task<Team?> GetTeamByIdAsync(string id, CancellationToken cancellationToken)
         {
             var team = await _teamRepository.GetByIdAsync(id, cancellationToken);
@@ -38,14 +35,12 @@ namespace ProyectAPI.Services
             return team;
         }
 
-        // Validar si el usuario ya pertenece a algún equipo
         public async Task<bool> UserBelongsToAnyTeamAsync(string userId, CancellationToken cancellationToken)
         {
             var allTeams = await _teamRepository.GetAllAsync(cancellationToken);
             return allTeams.Any(t => t.Members.Any(m => m.UserId == userId));
         }
 
-        // Crear un nuevo equipo asignando al creador como capitán
         public async Task<Team> CreateTeamAsync(TeamCreateDto dto, string userId, string fallbackUsername, CancellationToken cancellationToken)
         {
             if (await UserBelongsToAnyTeamAsync(userId, cancellationToken))
@@ -69,6 +64,7 @@ namespace ProyectAPI.Services
                         UserId = userId,
                         Username = realUsername,
                         Role = "Captain",
+                        IsStarter = true,
                         JoinedAt = DateTime.UtcNow,
                         LastActive = DateTime.UtcNow
                     }
@@ -79,7 +75,6 @@ namespace ProyectAPI.Services
             return newTeam;
         }
 
-        // Unirse a un equipo existente
         public async Task<bool> JoinTeamAsync(string teamId, string userId, string fallbackUsername, CancellationToken cancellationToken)
         {
             if (await UserBelongsToAnyTeamAsync(userId, cancellationToken))
@@ -103,6 +98,7 @@ namespace ProyectAPI.Services
                 UserId = userId,
                 Username = realUsername,
                 Role = "Member",
+                IsStarter = true,
                 JoinedAt = DateTime.UtcNow,
                 LastActive = DateTime.UtcNow
             };
@@ -110,7 +106,6 @@ namespace ProyectAPI.Services
             return await _teamRepository.AddMemberAsync(teamId, newMember, cancellationToken);
         }
 
-        // Abandonar un equipo
         public async Task<bool> LeaveTeamAsync(string teamId, string userId, CancellationToken cancellationToken)
         {
             var team = await _teamRepository.GetByIdAsync(teamId, cancellationToken);
@@ -125,6 +120,70 @@ namespace ProyectAPI.Services
             }
 
             team.Members.Remove(memberToRemove);
+            return await _teamRepository.UpdateAsync(team, cancellationToken);
+        }
+
+        // RF-10: Actualizar información del equipo
+        public async Task<bool> UpdateTeamAsync(string teamId, UpdateTeamDto dto, string userId, CancellationToken cancellationToken)
+        {
+            var team = await _teamRepository.GetByIdAsync(teamId, cancellationToken);
+            if (team == null) return false;
+
+            if (team.CaptainId != userId)
+            {
+                throw new InvalidOperationException("Solo el capitán puede modificar la información del equipo.");
+            }
+
+            team.Name = dto.Name;
+            team.Tag = dto.Tag;
+            if (!string.IsNullOrWhiteSpace(dto.LogoUrl))
+            {
+                team.LogoUrl = dto.LogoUrl;
+            }
+
+            return await _teamRepository.UpdateAsync(team, cancellationToken);
+        }
+
+        // RF-13: Expulsar miembro
+        public async Task<bool> RemoveMemberAsync(string teamId, string memberUserId, string currentUserId, CancellationToken cancellationToken)
+        {
+            var team = await _teamRepository.GetByIdAsync(teamId, cancellationToken);
+            if (team == null) return false;
+
+            if (team.CaptainId != currentUserId)
+            {
+                throw new InvalidOperationException("Solo el capitán puede expulsar integrantes.");
+            }
+
+            if (team.CaptainId == memberUserId)
+            {
+                throw new InvalidOperationException("El capitán no puede expulsarse a sí mismo.");
+            }
+
+            var memberToRemove = team.Members.FirstOrDefault(m => m.UserId == memberUserId);
+            if (memberToRemove == null) return false;
+
+            team.Members.Remove(memberToRemove);
+            return await _teamRepository.UpdateAsync(team, cancellationToken);
+        }
+
+        // RF-14 y RF-15: Cambiar rol y titular/suplente
+        public async Task<bool> UpdateMemberRoleAsync(string teamId, string memberUserId, string newRole, bool isStarter, string currentUserId, CancellationToken cancellationToken)
+        {
+            var team = await _teamRepository.GetByIdAsync(teamId, cancellationToken);
+            if (team == null) return false;
+
+            if (team.CaptainId != currentUserId)
+            {
+                throw new InvalidOperationException("Solo el capitán puede modificar los roles de los integrantes.");
+            }
+
+            var member = team.Members.FirstOrDefault(m => m.UserId == memberUserId);
+            if (member == null) return false;
+
+            member.Role = newRole;
+            member.IsStarter = isStarter;
+
             return await _teamRepository.UpdateAsync(team, cancellationToken);
         }
     }

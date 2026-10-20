@@ -23,18 +23,15 @@ public sealed class ProfileController : ControllerBase
     [HttpGet("me")]
     public async Task<ActionResult> GetMyProfile(CancellationToken cancellationToken)
     {
-        // Leemos el ID del usuario directamente desde los claims del Token JWT
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return Unauthorized();
 
-        // Buscamos al usuario en la base de datos de MongoDB
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         if (user == null) return NotFound("Usuario no encontrado.");
 
         user.LastActive = DateTime.UtcNow;
         await _userRepository.UpdateAsync(user, cancellationToken);
 
-        // Retornamos los datos limpios que consumirá React (incluyendo juegos, avatar y estadísticas)
         return Ok(new
         {
             Id = user.Id,
@@ -49,11 +46,9 @@ public sealed class ProfileController : ControllerBase
         });
     }
 
-    // Perfil público de otro usuario (sin email ni rol)
     [HttpGet("{id}")]
     public async Task<ActionResult> GetUserProfile(string id, CancellationToken cancellationToken)
     {
-        // Si el ID no tiene formato válido de ObjectId, evitamos consultar la base
         if (!ObjectId.TryParse(id, out _))
         {
             return NotFound(new { message = "Usuario no encontrado." });
@@ -65,7 +60,6 @@ public sealed class ProfileController : ControllerBase
             return NotFound(new { message = "Usuario no encontrado." });
         }
 
-        // Solo datos públicos
         return Ok(new
         {
             Id = user.Id,
@@ -78,6 +72,11 @@ public sealed class ProfileController : ControllerBase
         });
     }
 
+    // ==========================================
+    // GESTIÓN DE VIDEOJUEGOS (RF-05, RF-06, RF-07, RF-08)
+    // ==========================================
+
+    // RF-06: Agregar videojuego al perfil
     [HttpPost("games")]
     public async Task<ActionResult> AddGameToProfile(
         [FromBody] AddGameRequest request,
@@ -87,7 +86,13 @@ public sealed class ProfileController : ControllerBase
         if (userId == null) return Unauthorized();
 
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound("Usuario no encontrado.");
+
+        // Evitar duplicados del mismo juego
+        if (user.Games.Any(g => g.GameName.Equals(request.GameName, StringComparison.OrdinalIgnoreCase)))
+        {
+            return BadRequest(new { message = "Ya tienes este videojuego asociado a tu perfil." });
+        }
 
         var newGame = new UserGame
         {
@@ -102,6 +107,60 @@ public sealed class ProfileController : ControllerBase
         return Ok(new { message = "Videojuego agregado exitosamente", games = user.Games });
     }
 
+    // RF-07: Modificar el nombre de usuario y rango de un videojuego asociado
+    [HttpPut("games")]
+    public async Task<ActionResult> UpdateGameInProfile(
+        [FromBody] AddGameRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user == null) return NotFound("Usuario no encontrado.");
+
+        var existingGame = user.Games.FirstOrDefault(g => g.GameName.Equals(request.GameName, StringComparison.OrdinalIgnoreCase));
+        if (existingGame == null)
+        {
+            return NotFound(new { message = "No tienes registrado este videojuego en tu perfil." });
+        }
+
+        existingGame.InGameName = request.InGameName;
+        existingGame.Rank = request.Rank;
+
+        await _userRepository.UpdateAsync(user, cancellationToken);
+
+        return Ok(new { message = "Videojuego actualizado exitosamente", games = user.Games });
+    }
+
+    // RF-08: Eliminar un videojuego asociado al perfil
+    [HttpDelete("games/{gameName}")]
+    public async Task<ActionResult> RemoveGameFromProfile(
+        string gameName,
+        CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user == null) return NotFound("Usuario no encontrado.");
+
+        var gameToRemove = user.Games.FirstOrDefault(g => g.GameName.Equals(gameName, StringComparison.OrdinalIgnoreCase));
+        if (gameToRemove == null)
+        {
+            return NotFound(new { message = "El videojuego no se encuentra en tu perfil." });
+        }
+
+        user.Games.Remove(gameToRemove);
+        await _userRepository.UpdateAsync(user, cancellationToken);
+
+        return Ok(new { message = "Videojuego eliminado exitosamente", games = user.Games });
+    }
+
+    // ==========================================
+    // ESTADÍSTICAS Y AVATAR
+    // ==========================================
+
     [HttpPut("stats")]
     public async Task<ActionResult> UpdateUserStats(
         [FromBody] UpdateStatsRequest request,
@@ -113,15 +172,11 @@ public sealed class ProfileController : ControllerBase
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         if (user == null) return NotFound("Usuario no encontrado.");
 
-        // Asignamos directamente los valores ingresados (evita la acumulación infinita)
         user.Stats.Wins = request.Wins;
         user.Stats.Losses = request.Losses;
         user.Stats.Draws = request.Draws;
-
-        // Calculamos el total de partidas jugadas
         user.Stats.MatchesPlayed = user.Stats.Wins + user.Stats.Losses + user.Stats.Draws;
 
-        // Calculamos el Winrate automáticamente evitando división por cero
         if (user.Stats.MatchesPlayed > 0)
         {
             user.Stats.Winrate = (int)Math.Round((double)user.Stats.Wins / user.Stats.MatchesPlayed * 100);
