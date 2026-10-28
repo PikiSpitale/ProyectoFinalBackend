@@ -48,15 +48,29 @@ namespace ProyectAPI.Services
                 throw new InvalidOperationException("Ya perteneces a un equipo.");
             }
 
+            if (string.IsNullOrWhiteSpace(dto.GameName))
+            {
+                throw new InvalidOperationException("El videojuego es obligatorio para crear un equipo.");
+            }
+
             var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
             string realUsername = user?.Username ?? fallbackUsername;
 
+            // Validar que el usuario tenga asociado el juego con in-game name y rango (requisito para torneos)
+            var userGame = user?.Games?.FirstOrDefault(g => g.GameName.Equals(dto.GameName, StringComparison.OrdinalIgnoreCase));
+            if (userGame is null || string.IsNullOrWhiteSpace(userGame.InGameName) || string.IsNullOrWhiteSpace(userGame.Rank))
+            {
+                throw new InvalidOperationException("Debes tener el videojuego asociado a tu perfil con nombre de usuario y rango para crear un equipo de ese juego.");
+            }
+
             var newTeam = new Team
             {
-                Name = dto.Name,
-                Tag = dto.Tag,
+                Name = dto.Name?.Trim() ?? string.Empty,
+                Tag = dto.Tag?.Trim().ToUpperInvariant() ?? string.Empty,
                 LogoUrl = string.IsNullOrWhiteSpace(dto.LogoUrl) ? "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600&auto=format&fit=crop" : dto.LogoUrl,
+                GameName = dto.GameName.Trim(),
                 CaptainId = userId,
+                CreatedAt = DateTime.UtcNow,
                 Members = new List<TeamMember>
                 {
                     new TeamMember
@@ -93,6 +107,20 @@ namespace ProyectAPI.Services
             var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
             string realUsername = user?.Username ?? fallbackUsername;
 
+            // Validar que el usuario tenga el juego del equipo con in-game name y rango
+            if (string.IsNullOrWhiteSpace(team.GameName))
+            {
+                throw new InvalidOperationException("El equipo no tiene un videojuego asociado.");
+            }
+
+            var userGame = user?.Games?.FirstOrDefault(g => g.GameName.Equals(team.GameName, StringComparison.OrdinalIgnoreCase));
+            if (userGame is null || string.IsNullOrWhiteSpace(userGame.InGameName) || string.IsNullOrWhiteSpace(userGame.Rank))
+            {
+                throw new InvalidOperationException("Debes tener el videojuego del equipo asociado a tu perfil con nombre de usuario y rango para unirte.");
+            }
+
+            // Según RF-11/RF-12 las invitaciones son el flujo correcto; este endpoint queda por compatibilidad
+            // pero exigimos validar que el invitado tenga el juego (coherente con torneos grupales).
             var newMember = new TeamMember
             {
                 UserId = userId,
@@ -134,8 +162,14 @@ namespace ProyectAPI.Services
                 throw new InvalidOperationException("Solo el capitán puede modificar la información del equipo.");
             }
 
-            team.Name = dto.Name;
-            team.Tag = dto.Tag;
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+            {
+                team.Name = dto.Name.Trim();
+            }
+            if (!string.IsNullOrWhiteSpace(dto.Tag))
+            {
+                team.Tag = dto.Tag.Trim().ToUpperInvariant();
+            }
             if (!string.IsNullOrWhiteSpace(dto.LogoUrl))
             {
                 team.LogoUrl = dto.LogoUrl;

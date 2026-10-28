@@ -1,6 +1,14 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using ProyectAPI.DTOs;
+using ProyectAPI.Models;
+using ProyectAPI.Repositories;
 using ProyectAPI.Services;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace ProyectAPI.Controllers;
 
@@ -11,10 +19,14 @@ public sealed class AuthController : ControllerBase
     private const string CookieName = "access_token";
 
     private readonly IAuthService _authService;
+    private readonly IUserRepository _userRepository;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IUserRepository userRepository, IConfiguration configuration)
     {
         _authService = authService;
+        _userRepository = userRepository;
+        _configuration = configuration;
     }
 
     [HttpPost("register")]
@@ -86,5 +98,110 @@ public sealed class AuthController : ControllerBase
             SameSite = SameSiteMode.None,           // frontend (http://localhost:5173) y API (https://localhost:7039) son orígenes distintos
             Expires = DateTimeOffset.UtcNow.AddDays(7)  // igual que la expiración del JWT
         });
+    }
+
+    [HttpGet("external/google")]
+    public IActionResult GoogleLogin([FromQuery] string? returnUrl)
+    {
+        var redirectUrl = Url.Action("GoogleCallback", "Auth", new { returnUrl }, Request.Scheme);
+        var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+        return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+    }
+
+    [HttpGet("external/google/callback")]
+    public async Task<IActionResult> GoogleCallback([FromQuery] string? returnUrl, CancellationToken cancellationToken)
+    {
+        var result = await HttpContext.AuthenticateAsync("Cookies");
+        if (!result.Succeeded || result.Principal == null)
+        {
+            try { await HttpContext.SignOutAsync("Cookies"); } catch { }
+            return Redirect("http://localhost:5173/login?error=external_auth_failed");
+        }
+
+        var claims = result.Principal.Claims.ToList();
+        var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value?.ToLowerInvariant();
+        var externalId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+        var picture = claims.FirstOrDefault(c => c.Type == "picture")?.Value ?? claims.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value;
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(externalId))
+        {
+            return Redirect("http://localhost:5173/login?error=missing_email");
+        }
+
+        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+        if (user == null)
+        {
+            var baseUsername = (name ?? email.Split('@')[0]).Replace(" ", "");
+            if (string.IsNullOrWhiteSpace(baseUsername)) baseUsername = "user";
+            var username = baseUsername;
+            var counter = 0;
+            while (await _userRepository.ExistsByUsernameAsync(username, cancellationToken))
+            {
+                counter++;
+                username = $"{baseUsername}{counter}";
+                if (counter > 20) break;
+            }
+
+            user = new User
+            {
+                Username = username,
+                Email = email,
+                PasswordHash = string.Empty,
+                Role = "User",
+                CreatedAt = DateTime.UtcNow,
+                AvatarUrl = picture ?? string.Empty,
+                AuthProvider = "Google",
+                ExternalId = externalId,
+                EmailVerified = true,
+                Games = new List<UserGame>(),
+                Stats = new UserStats { MatchesPlayed = 0, Winrate = 0 }
+            };
+
+            await _userRepository.CreateAsync(user, cancellationToken);
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(user.ExternalId))
+            {
+                user.ExternalId = externalId;
+                user.AuthProvider = string.IsNullOrWhiteSpace(user.AuthProvider) || user.AuthProvider == "Local" ? "Google" : user.AuthProvider;
+                if (!string.IsNullOrWhiteSpace(picture) && string.IsNullOrWhiteSpace(user.AvatarUrl))
+                    user.AvatarUrl = picture;
+                user.EmailVerified = true;
+                await _userRepository.UpdateAsync(user, cancellationToken);
+            }
+        }
+
+        var token = GenerateJwtToken(user);
+        SetAuthCookie(token);
+
+        await HttpContext.SignOutAsync("Cookies");
+
+        var target = string.IsNullOrWhiteSpace(returnUrl) ? "http://localhost:5173/dashboard" : returnUrl;
+        return Redirect(target);
+    }
+
+    private string GenerateJwtToken(User user)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.Name, user.Username)
+            }),
+            Expires = DateTime.UtcNow.AddDays(7),
+            Issuer = _configuration["Jwt:Issuer"],
+            Audience = _configuration["Jwt:Audience"],
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
     }
 }

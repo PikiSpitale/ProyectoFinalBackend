@@ -11,14 +11,16 @@ namespace ProyectAPI.Models
 
         public string Name { get; set; } = string.Empty;
 
-        public string Tag { get; set; } = string.Empty; 
+        public string Tag { get; set; } = string.Empty;
 
         public string LogoUrl { get; set; } = string.Empty;
 
-        public string CaptainId { get; set; } = string.Empty; 
+        public string GameName { get; set; } = string.Empty;
+
+        public string CaptainId { get; set; } = string.Empty;
 
         public List<TeamMember> Members { get; set; } = new();
-    }
 
-    
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
 }

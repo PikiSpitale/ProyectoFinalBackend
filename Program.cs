@@ -1,9 +1,15 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using ProyectAPI.Infrastructure;
 using ProyectAPI.Repositories;
 using ProyectAPI.Services;
+using System.IO;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +25,21 @@ builder.Services
         "La configuración de MongoDB está incompleta."
     )
     .ValidateOnStart();
+
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.HttpOnly = HttpOnlyPolicy.Always;
+    options.Secure = CookieSecurePolicy.Always;
+});
+
+var keysFolder = Path.Combine(builder.Environment.ContentRootPath, "DataProtectionKeys");
+Directory.CreateDirectory(keysFolder);
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysFolder))
+    .SetApplicationName("ProyectAPI")
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(14));
 
 builder.Services.AddSingleton<MongoDbContext>();
 
@@ -83,7 +104,19 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Configuración de seguridad JWT
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme = "Cookies";
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddCookie("Cookies", options =>
+    {
+        options.Cookie.Name = "ExternalAuth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.None;
+    })
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -109,7 +142,32 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 return Task.CompletedTask;
             }
         };
+    })
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+        options.SignInScheme = "Cookies";
+        options.CallbackPath = "/api/auth/external/google/callback";
+        options.SaveTokens = true;
+        options.CorrelationCookie.Name = "GoogleCorrelation";
+        options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.CorrelationCookie.HttpOnly = true;
+        options.CorrelationCookie.Path = "/";
+        options.CorrelationCookie.IsEssential = true;
+        options.CorrelationCookie.Expiration = TimeSpan.FromMinutes(10);
     });
+
+builder.Services.ConfigureExternalCookie(options =>
+{
+    options.Cookie.Name = "ExternalAuthCookie";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Path = "/";
+});
 
 builder.Services.AddAuthorization();
 
@@ -124,6 +182,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Activar CORS (Debe ir antes de autenticación y controladores)
+app.UseCookiePolicy();
+
 app.UseCors("AllowFrontend");
 
 app.UseAuthentication();

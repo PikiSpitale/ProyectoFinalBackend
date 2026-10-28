@@ -16,6 +16,8 @@ namespace ProyectAPI.Models
         public string Status { get; set; } = "Próximo";
         public int MaxParticipants { get; set; } = 32;
 
+        public string TournamentType { get; set; } = "Individual"; // Individual o Equipo
+
         public string Rules { get; set; } = string.Empty;
         public string RankConditions { get; set; } = string.Empty;
 
@@ -39,5 +41,8 @@ namespace ProyectAPI.Models
         // Un moderador puede descalificar a un jugador que no cumple las condiciones
         public bool IsDisqualified { get; set; } = false;
         public string? DisqualificationReason { get; set; }
+
+        public string? TeamId { get; set; }
+        public string? TeamName { get; set; }
     }
 }

@@ -51,7 +51,7 @@ namespace ProyectAPI.Controllers
             }
         }
 
-        // Endpoint para registrarse en un torneo
+        // Endpoint para registrarse en un torneo individual
         [HttpPost("{id}/register")]
         [Authorize]
         public async Task<IActionResult> Register(string id, [FromBody] TournamentParticipantDto participantDto, CancellationToken cancellationToken)
@@ -63,15 +63,54 @@ namespace ProyectAPI.Controllers
                 return Unauthorized(new { message = "No se pudo identificar al usuario." });
             }
 
-            var safeDto = participantDto with { UserId = userIdFromToken };
-
-            var success = await _tournamentService.RegisterParticipantAsync(id, safeDto, cancellationToken);
-            if (!success)
+            try
             {
-                return BadRequest(new { message = "No se pudo realizar la inscripción. Es posible que el torneo esté lleno, ya haya comenzado o ya estés inscrito." });
+                var safeDto = participantDto with { UserId = userIdFromToken };
+
+                var success = await _tournamentService.RegisterParticipantAsync(id, safeDto, cancellationToken);
+                if (!success)
+                {
+                    return BadRequest(new { message = "No se pudo realizar la inscripción. Es posible que el torneo esté lleno, ya haya comenzado, que falte habilitar la inscripción (30 min antes) o ya estés inscrito." });
+                }
+
+                return Ok(new { message = "¡Inscripción exitosa al torneo!" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // Endpoint para inscribir un equipo a un torneo por equipos
+        [HttpPost("{id}/register-team")]
+        [Authorize]
+        public async Task<IActionResult> RegisterTeam(string id, [FromBody] TeamTournamentRegisterRequest request, CancellationToken cancellationToken)
+        {
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdFromToken))
+            {
+                return Unauthorized(new { message = "No se pudo identificar al usuario." });
             }
 
-            return Ok(new { message = "¡Inscripción exitosa al torneo!" });
+            if (string.IsNullOrWhiteSpace(request.TeamId))
+            {
+                return BadRequest(new { message = "Debés indicar el equipo a inscribir." });
+            }
+
+            try
+            {
+                var success = await _tournamentService.RegisterTeamAsync(id, request.TeamId, userIdFromToken, cancellationToken);
+                if (!success)
+                {
+                    return BadRequest(new { message = "No se pudo realizar la inscripción del equipo. Verificá cupo, tipo de torneo, ventana de inscripción (30 min antes) o que ya esté inscrito." });
+                }
+
+                return Ok(new { message = "¡Equipo inscripto exitosamente al torneo!" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         // Endpoint para eliminar un torneo (solo moderadores)

@@ -8,6 +8,7 @@ namespace ProyectAPI.Services
         Task<TournamentResponse?> GetTournamentByIdAsync(string id, CancellationToken cancellationToken);
         Task CreateTournamentAsync(CreateTournamentRequest request, CancellationToken cancellationToken);
         Task<bool> RegisterParticipantAsync(string tournamentId, TournamentParticipantDto participantDto, CancellationToken cancellationToken);
+        Task<bool> RegisterTeamAsync(string tournamentId, string teamId, string currentUserId, CancellationToken cancellationToken);
         Task<bool> DeleteTournamentAsync(string id, CancellationToken cancellationToken);
 
         // Enfrentamientos del torneo (null si el torneo no existe)

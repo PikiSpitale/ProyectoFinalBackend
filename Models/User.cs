@@ -33,4 +33,9 @@ public sealed class User
 
     // Estadísticas globales o competitivas
     public UserStats Stats { get; set; } = new();
+
+    // Autenticación externa
+    public string? AuthProvider { get; set; } = "Local"; // Local, Google, Steam, Discord, Riot
+    public string? ExternalId { get; set; }
+    public bool EmailVerified { get; set; } = false;
 }

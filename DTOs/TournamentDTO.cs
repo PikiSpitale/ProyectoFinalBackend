@@ -9,7 +9,8 @@
         string Rules,
         string RankConditions,
         DateTime StartDate,
-        DateTime EndDate
+        DateTime EndDate,
+        string TournamentType = "Individual"
     );
 
     public record TournamentResponse(
@@ -20,6 +21,7 @@
         decimal PrizePool,
         string Status,
         int MaxParticipants,
+        string TournamentType,
         string Rules,
         string RankConditions,
         DateTime StartDate,
@@ -34,7 +36,13 @@
         string Rank,
         DateTime RegisteredAt,
         bool IsDisqualified = false,
-        string? DisqualificationReason = null
+        string? DisqualificationReason = null,
+        string? TeamId = null,
+        string? TeamName = null
+    );
+
+    public record TeamTournamentRegisterRequest(
+        string TeamId
     );
 
     public record DisqualifyRequest(

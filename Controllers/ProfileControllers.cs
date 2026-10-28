@@ -161,7 +161,9 @@ public sealed class ProfileController : ControllerBase
     // ESTADÍSTICAS Y AVATAR
     // ==========================================
 
+    // Las estadísticas se actualizan desde los resultados de torneos (RF-36). No se permite actualización libre por el usuario.
     [HttpPut("stats")]
+    [Authorize(Roles = AppRoles.Staff)]
     public async Task<ActionResult> UpdateUserStats(
         [FromBody] UpdateStatsRequest request,
         CancellationToken cancellationToken)
