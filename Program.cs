@@ -157,17 +157,13 @@ builder.Services.AddAuthentication(options =>
         options.CorrelationCookie.Path = "/";
         options.CorrelationCookie.IsEssential = true;
         options.CorrelationCookie.Expiration = TimeSpan.FromMinutes(10);
+        options.Events.OnRemoteFailure = context =>
+        {
+            context.HandleResponse();
+            context.Response.Redirect("http://localhost:5173/login?error=external_auth_failed");
+            return Task.CompletedTask;
+        };
     });
-
-builder.Services.ConfigureExternalCookie(options =>
-{
-    options.Cookie.Name = "ExternalAuthCookie";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.IsEssential = true;
-    options.Cookie.Path = "/";
-});
 
 builder.Services.AddAuthorization();
 

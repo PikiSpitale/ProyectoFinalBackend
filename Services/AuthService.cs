@@ -22,6 +22,14 @@ public sealed class AuthService : IAuthService
         _configuration = configuration;
     }
 
+    public async Task<UserResponse?> GetCurrentUserAsync(string userId, CancellationToken cancellationToken)
+    {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        return user is { IsActive: true }
+            ? new UserResponse(user.Id, user.Username, user.Email, user.Role, user.CreatedAt)
+            : null;
+    }
+
     public async Task<AuthResponse> RegisterAsync(
         RegisterRequest request,
         CancellationToken cancellationToken

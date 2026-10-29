@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectAPI.DTOs;
 using ProyectAPI.Models;
@@ -89,6 +90,18 @@ public sealed class AuthController : ControllerBase
         return Ok(new { message = "Sesión cerrada." });
     }
 
+    [Authorize]
+    [HttpGet("me")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> Me(CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+
+        var user = await _authService.GetCurrentUserAsync(userId, cancellationToken);
+        return user == null ? Unauthorized() : Ok(new { user });
+    }
+
     private void SetAuthCookie(string token)
     {
         Response.Cookies.Append(CookieName, token, new CookieOptions
@@ -101,15 +114,16 @@ public sealed class AuthController : ControllerBase
     }
 
     [HttpGet("external/google")]
-    public IActionResult GoogleLogin([FromQuery] string? returnUrl)
+    public IActionResult GoogleLogin()
     {
-        var redirectUrl = Url.Action("GoogleCallback", "Auth", new { returnUrl }, Request.Scheme);
+        var redirectUrl = Url.Action("GoogleCallback", "Auth", null, Request.Scheme);
         var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
         return Challenge(properties, GoogleDefaults.AuthenticationScheme);
     }
 
-    [HttpGet("external/google/callback")]
-    public async Task<IActionResult> GoogleCallback([FromQuery] string? returnUrl, CancellationToken cancellationToken)
+    // El callback de Google lo procesa el middleware; esta ruta completa el registro.
+    [HttpGet("external/google/complete")]
+    public async Task<IActionResult> GoogleCallback(CancellationToken cancellationToken)
     {
         var result = await HttpContext.AuthenticateAsync("Cookies");
         if (!result.Succeeded || result.Principal == null)
@@ -126,6 +140,7 @@ public sealed class AuthController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(externalId))
         {
+            await HttpContext.SignOutAsync("Cookies");
             return Redirect("http://localhost:5173/login?error=missing_email");
         }
 
@@ -178,8 +193,7 @@ public sealed class AuthController : ControllerBase
 
         await HttpContext.SignOutAsync("Cookies");
 
-        var target = string.IsNullOrWhiteSpace(returnUrl) ? "http://localhost:5173/dashboard" : returnUrl;
-        return Redirect(target);
+        return Redirect("http://localhost:5173/dashboard");
     }
 
     private string GenerateJwtToken(User user)
