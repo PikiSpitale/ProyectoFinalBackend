@@ -4,6 +4,8 @@ namespace ProyectAPI.DTOs
 {
     public class TeamCreateDto
     {
+        public bool IsPrivate { get; set; }
+
         [Required(ErrorMessage = "El nombre del equipo es obligatorio.")]
         [StringLength(40, MinimumLength = 2)]
         public string Name { get; set; } = string.Empty;

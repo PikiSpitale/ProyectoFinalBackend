@@ -80,6 +80,15 @@ namespace ProyectAPI.Repositories
             return await _users.Find(_ => true).ToListAsync(cancellationToken);
         }
 
+        public async Task<List<ProyectAPI.DTOs.InviteeDto>> SearchInviteesAsync(string username, CancellationToken ct)
+        {
+            var filter = Builders<User>.Filter.Regex(x => x.Username,
+                new MongoDB.Bson.BsonRegularExpression(System.Text.RegularExpressions.Regex.Escape(username), "i"))
+                & Builders<User>.Filter.Eq(x => x.IsActive, true);
+            return await _users.Find(filter).SortBy(x => x.Username).Limit(20)
+                .Project(x => new ProyectAPI.DTOs.InviteeDto(x.Id, x.Username, x.AvatarUrl)).ToListAsync(ct);
+        }
+
         public async Task UpdateAsync(User user, CancellationToken cancellationToken)
         {
             await _users.ReplaceOneAsync(u => u.Id == user.Id, user, cancellationToken: cancellationToken);

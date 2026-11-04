@@ -8,6 +8,7 @@ using ProyectAPI.Services;
 namespace ProyectAPI.Controllers
 {
     [ApiController]
+    [TeamExceptionFilter]
     [Route("api/[controller]")]
     public class TeamsController : ControllerBase
     {

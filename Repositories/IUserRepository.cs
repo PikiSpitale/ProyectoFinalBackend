@@ -10,6 +10,7 @@ namespace ProyectAPI.Repositories
         Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken);
         Task<User?> GetByIdAsync(string id, CancellationToken cancellationToken);
         Task<List<User>> GetAllAsync(CancellationToken cancellationToken);
+        Task<List<ProyectAPI.DTOs.InviteeDto>> SearchInviteesAsync(string username, CancellationToken ct);
         Task UpdateAsync(User user, CancellationToken cancellationToken);
     }
 }

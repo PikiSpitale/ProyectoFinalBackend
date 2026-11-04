@@ -17,6 +17,8 @@ namespace ProyectAPI.Models
 
         public string GameName { get; set; } = string.Empty;
 
+        public bool IsPrivate { get; set; } = false;
+
         public string CaptainId { get; set; } = string.Empty;
 
         public List<TeamMember> Members { get; set; } = new();

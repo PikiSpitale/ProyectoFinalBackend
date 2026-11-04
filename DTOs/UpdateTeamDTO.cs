@@ -4,6 +4,8 @@ namespace ProyectAPI.DTOs
 {
     public class UpdateTeamDto
     {
+        public bool? IsPrivate { get; set; }
+
         [StringLength(40, MinimumLength = 2)]
         public string? Name { get; set; }
 
