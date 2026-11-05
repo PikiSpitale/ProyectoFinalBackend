@@ -18,11 +18,16 @@ namespace ProyectAPI.Controllers
             _tournamentService = tournamentService;
         }
 
-        // Endpoint para obtener todos los torneos
+        // RF-19: consulta y filtrado de torneos
         [HttpGet]
-        public async Task<ActionResult<List<TournamentResponse>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<List<TournamentResponse>>> GetAll(
+            [FromQuery] string? gameName,
+            [FromQuery] string? status,
+            [FromQuery] DateTime? fromDate,
+            [FromQuery] DateTime? toDate,
+            CancellationToken cancellationToken)
         {
-            var tournaments = await _tournamentService.GetAllTournamentsAsync(cancellationToken);
+            var tournaments = await _tournamentService.GetAllTournamentsAsync(gameName, status, fromDate, toDate, cancellationToken);
             return Ok(tournaments);
         }
 
@@ -113,6 +118,58 @@ namespace ProyectAPI.Controllers
             }
         }
 
+        // RF-17: modificar torneo (solo moderadores)
+        [HttpPut("{id}")]
+        [Authorize(Roles = AppRoles.Staff)]
+        public async Task<IActionResult> Update(string id, [FromBody] UpdateTournamentRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var updated = await _tournamentService.UpdateTournamentAsync(id, request, cancellationToken);
+                if (updated == null) return NotFound(new { message = "Torneo no encontrado." });
+                return Ok(updated);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // RF-18: cancelar torneo (solo moderadores)
+        [HttpPost("{id}/cancel")]
+        [Authorize(Roles = AppRoles.Staff)]
+        public async Task<IActionResult> Cancel(string id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var cancelled = await _tournamentService.CancelTournamentAsync(id, cancellationToken);
+                if (!cancelled) return NotFound(new { message = "Torneo no encontrado." });
+                return Ok(new { message = "Torneo cancelado." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // RF-22: verificar rango de un participante (solo moderadores)
+        [HttpPost("{id}/participants/{userId}/verify-rank")]
+        [Authorize(Roles = AppRoles.Staff)]
+        public async Task<IActionResult> VerifyRank(string id, string userId, [FromBody] VerifyRankRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var verifier = User.FindFirstValue(ClaimTypes.Name) ?? User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "moderador";
+                var ok = await _tournamentService.VerifyParticipantRankAsync(id, userId, request.Verified, verifier, cancellationToken);
+                if (!ok) return NotFound(new { message = "Torneo o participante no encontrado." });
+                return Ok(new { message = request.Verified ? "Rango verificado." : "Verificación de rango rechazada." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         // Endpoint para eliminar un torneo (solo moderadores)
         [HttpDelete("{id}")]
         [Authorize(Roles = AppRoles.Staff)]
@@ -158,6 +215,23 @@ namespace ProyectAPI.Controllers
             try
             {
                 var matches = await _tournamentService.SetMatchResultAsync(id, matchId, request, cancellationToken);
+                if (matches == null) return NotFound(new { message = "Torneo o enfrentamiento no encontrado." });
+                return Ok(matches);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // RF-28: avanza manualmente al ganador de un partido finalizado (solo moderadores)
+        [HttpPost("{id}/matches/{matchId}/advance")]
+        [Authorize(Roles = AppRoles.Staff)]
+        public async Task<IActionResult> AdvanceWinner(string id, string matchId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var matches = await _tournamentService.AdvanceWinnerAsync(id, matchId, cancellationToken);
                 if (matches == null) return NotFound(new { message = "Torneo o enfrentamiento no encontrado." });
                 return Ok(matches);
             }

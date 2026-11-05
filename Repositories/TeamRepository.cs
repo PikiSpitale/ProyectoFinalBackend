@@ -41,5 +41,12 @@ namespace ProyectAPI.Repositories
             var result = await _teamsCollection.ReplaceOneAsync(t => t.Id == team.Id, team, new ReplaceOptions(), cancellationToken);
             return result.ModifiedCount > 0 || result.MatchedCount > 0;
         }
+
+        // Eliminar un equipo por id
+        public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken)
+        {
+            var result = await _teamsCollection.DeleteOneAsync(t => t.Id == id, cancellationToken);
+            return result.DeletedCount > 0;
+        }
     }
 }

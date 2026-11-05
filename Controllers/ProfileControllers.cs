@@ -14,10 +14,12 @@ namespace ProyectAPI.Controllers;
 public sealed class ProfileController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
+    private readonly ITournamentRepository _tournamentRepository;
 
-    public ProfileController(IUserRepository userRepository)
+    public ProfileController(IUserRepository userRepository, ITournamentRepository tournamentRepository)
     {
         _userRepository = userRepository;
+        _tournamentRepository = tournamentRepository;
     }
 
     [HttpGet("me")]
@@ -43,6 +45,71 @@ public sealed class ProfileController : ControllerBase
             user.Stats,
             AvatarUrl = user.AvatarUrl,
             user.LastActive
+        });
+    }
+
+    // RF-03 / RF-04: el usuario modifica su nombre, email y avatar.
+    // El email y el nombre de usuario no pueden quedar repetidos en otra cuenta.
+    [HttpPut("me")]
+    public async Task<ActionResult> UpdateMyProfile(
+        [FromBody] UpdateProfileRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user == null) return NotFound(new { message = "Usuario no encontrado." });
+
+        var newUsername = string.IsNullOrWhiteSpace(request.Username)
+            ? user.Username
+            : request.Username.Trim();
+
+        var newEmail = string.IsNullOrWhiteSpace(request.Email)
+            ? user.Email
+            : request.Email.Trim().ToLowerInvariant();
+
+        if (newUsername.Length < 3)
+        {
+            return BadRequest(new { message = "El nombre de usuario debe tener al menos 3 caracteres." });
+        }
+
+        if (!string.Equals(newUsername, user.Username, StringComparison.Ordinal))
+        {
+            var existingUsername = await _userRepository.GetByUsernameAsync(newUsername, cancellationToken);
+            if (existingUsername is not null && existingUsername.Id != user.Id)
+            {
+                return Conflict(new { message = "Ese nombre de usuario ya está en uso." });
+            }
+        }
+
+        if (!string.Equals(newEmail, user.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            var existingEmail = await _userRepository.GetByEmailAsync(newEmail, cancellationToken);
+            if (existingEmail is not null && existingEmail.Id != user.Id)
+            {
+                return Conflict(new { message = "Ese email ya está asociado a otra cuenta." });
+            }
+        }
+
+        user.Username = newUsername;
+        user.Email = newEmail;
+
+        // Si el campo viene nulo se conserva el avatar actual; si viene vacío se borra.
+        if (request.AvatarUrl is not null)
+        {
+            user.AvatarUrl = request.AvatarUrl.Trim();
+        }
+
+        await _userRepository.UpdateAsync(user, cancellationToken);
+
+        return Ok(new
+        {
+            message = "Perfil actualizado con éxito",
+            Id = user.Id,
+            user.Username,
+            user.Email,
+            AvatarUrl = user.AvatarUrl
         });
     }
 
@@ -151,8 +218,22 @@ public sealed class ProfileController : ControllerBase
             return NotFound(new { message = "El videojuego no se encuentra en tu perfil." });
         }
 
+        // RF-08: no se puede desvincular un juego con un torneo en curso, porque
+        // el usuario está compitiendo y su inscripción quedaría inválida.
+        if (await _tournamentRepository.HasInProgressTournamentWithGameAsync(gameToRemove.GameName, userId, cancellationToken))
+        {
+            return BadRequest(new
+            {
+                message = "No podés eliminar este videojuego porque tenés un torneo en curso de ese juego. Esperá a que finalice."
+            });
+        }
+
         user.Games.Remove(gameToRemove);
         await _userRepository.UpdateAsync(user, cancellationToken);
+
+        // RF-08: se limpian las inscripciones a torneos que todavía no comenzaron.
+        await _tournamentRepository.RemoveParticipantFromUpcomingTournamentsAsync(
+            gameToRemove.GameName, userId, cancellationToken);
 
         return Ok(new { message = "Videojuego eliminado exitosamente", games = user.Games });
     }

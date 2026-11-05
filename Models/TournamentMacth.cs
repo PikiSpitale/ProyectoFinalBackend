@@ -44,6 +44,10 @@ namespace ProyectAPI.Models
         public string UserId { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string InGameName { get; set; } = string.Empty;
+
+        // En torneos por equipo el cupo representa al equipo, no a una persona.
+        public string? TeamId { get; set; }
+        public string? TeamName { get; set; }
     }
 
     public static class MatchStatuses
@@ -58,5 +62,6 @@ namespace ProyectAPI.Models
         public const string Upcoming = "Próximo";
         public const string InProgress = "En curso";
         public const string Finished = "Finalizado";
+        public const string Cancelled = "Cancelado";
     }
 }

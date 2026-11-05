@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace ProyectAPI.Models
 {
+    [BsonIgnoreExtraElements]
     public class Tournament
     {
         [BsonId]
@@ -30,6 +31,7 @@ namespace ProyectAPI.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 
+    [BsonIgnoreExtraElements]
     public class TournamentParticipant
     {
         public string UserId { get; set; } = string.Empty;
@@ -41,6 +43,11 @@ namespace ProyectAPI.Models
         // Un moderador puede descalificar a un jugador que no cumple las condiciones
         public bool IsDisqualified { get; set; } = false;
         public string? DisqualificationReason { get; set; }
+
+        // RF-22: verificación manual del rango declarado por el moderador
+        public bool RankVerified { get; set; } = false;
+        public string? RankVerifiedBy { get; set; }
+        public DateTime? RankVerifiedAt { get; set; }
 
         public string? TeamId { get; set; }
         public string? TeamName { get; set; }

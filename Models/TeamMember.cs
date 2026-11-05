@@ -1,5 +1,8 @@
-﻿namespace ProyectAPI.Models
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace ProyectAPI.Models
 {
+    [BsonIgnoreExtraElements]
     public class TeamMember
     {
         public string UserId { get; set; } = string.Empty;

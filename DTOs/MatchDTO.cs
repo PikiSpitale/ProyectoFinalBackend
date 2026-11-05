@@ -3,7 +3,9 @@
     public record MatchSlotDto(
         string UserId,
         string Username,
-        string InGameName
+        string InGameName,
+        string? TeamId = null,
+        string? TeamName = null
     );
 
     public record MatchResponse(

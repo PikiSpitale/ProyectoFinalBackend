@@ -104,6 +104,36 @@ namespace ProyectAPI.Controllers
             }
         }
 
+        // Eliminar equipo: lo puede hacer el capitán o un moderador/admin
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<ActionResult> DeleteTeam(string id, CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { message = "Token inválido o expirado" });
+            }
+
+            var isModerator = User.IsInRole("Moderator") || User.IsInRole("Admin");
+
+            try
+            {
+                var success = await _teamService.DeleteTeamAsync(id, userId, isModerator, cancellationToken);
+                if (!success) return NotFound(new { message = "Equipo no encontrado" });
+
+                return Ok(new { message = "Equipo eliminado correctamente." });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         // RF-10: Actualizar información del equipo
         [HttpPut("{id}")]
         [Authorize]

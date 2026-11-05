@@ -8,6 +8,7 @@ namespace ProyectAPI.Repositories
         Task<bool> ExistsByUsernameAsync(string username, CancellationToken cancellationToken);
         Task<User> CreateAsync(User user, CancellationToken cancellationToken);
         Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken);
+        Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken);
         Task<User?> GetByIdAsync(string id, CancellationToken cancellationToken);
         Task<List<User>> GetAllAsync(CancellationToken cancellationToken);
         Task UpdateAsync(User user, CancellationToken cancellationToken);

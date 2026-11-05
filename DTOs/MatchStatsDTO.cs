@@ -24,7 +24,8 @@
         MatchResponse Match,
         GameInfoDto Game,
         Dictionary<string, int> StatsA,
-        Dictionary<string, int> StatsB
+        Dictionary<string, int> StatsB,
+        bool IsAdvanced
     );
 
     // Fija el valor de una estadística de un jugador. Side: "A" o "B".

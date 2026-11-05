@@ -69,6 +69,11 @@ namespace ProyectAPI.Repositories
             return await _users.Find(user => user.Email == email).FirstOrDefaultAsync(cancellationToken);
         }
 
+        public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken)
+        {
+            return await _users.Find(user => user.Username == username).FirstOrDefaultAsync(cancellationToken);
+        }
+
         public async Task<User?> GetByIdAsync(string id, CancellationToken cancellationToken)
         {
             return await _users.Find(user => user.Id == id).FirstOrDefaultAsync(cancellationToken);

@@ -37,6 +37,9 @@
         DateTime RegisteredAt,
         bool IsDisqualified = false,
         string? DisqualificationReason = null,
+        bool RankVerified = false,
+        string? RankVerifiedBy = null,
+        DateTime? RankVerifiedAt = null,
         string? TeamId = null,
         string? TeamName = null
     );
@@ -47,5 +50,25 @@
 
     public record DisqualifyRequest(
         string? Reason
+    );
+
+    // RF-17: actualización de torneo por moderador
+    public record UpdateTournamentRequest(
+        string? Title,
+        string? GameName,
+        string? BannerUrl,
+        decimal? PrizePool,
+        int? MaxParticipants,
+        string? Rules,
+        string? RankConditions,
+        DateTime? StartDate,
+        DateTime? EndDate,
+        string? TournamentType
+    );
+
+    // RF-22: verificación manual de rango
+    public record VerifyRankRequest(
+        bool Verified,
+        string? Note
     );
 }

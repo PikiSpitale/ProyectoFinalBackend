@@ -92,8 +92,21 @@ namespace ProyectAPI.Services
                 MapMatch(match),
                 game,
                 FillStats(game, match.StatsA),
-                FillStats(game, match.StatsB)
+                FillStats(game, match.StatsB),
+                IsAdvanced(tournament, matches, match)
             );
+        }
+
+        // Indica si el ganador ya fue pasado a la ronda siguiente (o si era la final y el torneo terminó).
+        private static bool IsAdvanced(Tournament tournament, List<TournamentMatch> matches, TournamentMatch match)
+        {
+            if (string.IsNullOrWhiteSpace(match.WinnerUserId)) return false;
+
+            var next = matches.FirstOrDefault(m => m.Round == match.Round + 1 && m.Position == match.Position / 2);
+            if (next is null) return tournament.Status == TournamentStatuses.Finished;
+
+            var slot = match.Position % 2 == 0 ? next.PlayerA : next.PlayerB;
+            return slot is not null && slot.UserId == match.WinnerUserId;
         }
 
         // Devuelve todas las estadísticas del juego, con 0 en las que todavía no se cargaron
@@ -120,6 +133,8 @@ namespace ProyectAPI.Services
             );
 
         private static MatchSlotDto? MapSlot(MatchSlot? slot) =>
-            slot is null ? null : new MatchSlotDto(slot.UserId, slot.Username, slot.InGameName);
+            slot is null
+                ? null
+                : new MatchSlotDto(slot.UserId, slot.Username, slot.InGameName, slot.TeamId, slot.TeamName);
     }
 }

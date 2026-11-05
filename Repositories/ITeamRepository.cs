@@ -11,5 +11,8 @@ namespace ProyectAPI.Repositories
 
         // Firma para actualizar el documento completo del equipo
         Task<bool> UpdateAsync(Team team, CancellationToken cancellationToken);
+
+        // Eliminar un equipo por id
+        Task<bool> DeleteAsync(string id, CancellationToken cancellationToken);
     }
 }

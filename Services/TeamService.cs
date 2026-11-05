@@ -144,11 +144,36 @@ namespace ProyectAPI.Services
 
             if (team.CaptainId == userId)
             {
-                throw new InvalidOperationException("El capitán no puede abandonar el equipo. Debe transferir el liderazgo o eliminar el equipo.");
+                // Si el capitán es el único integrante, el equipo se elimina.
+                var remaining = team.Members.Where(m => m.UserId != userId).ToList();
+                if (remaining.Count == 0)
+                {
+                    return await _teamRepository.DeleteAsync(teamId, cancellationToken);
+                }
+
+                // Si hay más integrantes, la capitanía pasa al miembro más antiguo del equipo.
+                var newCaptain = remaining.OrderBy(m => m.JoinedAt).First();
+                team.CaptainId = newCaptain.UserId;
+                newCaptain.Role = "Captain";
+                newCaptain.IsStarter = true;
             }
 
             team.Members.Remove(memberToRemove);
             return await _teamRepository.UpdateAsync(team, cancellationToken);
+        }
+
+        // Eliminar equipo: capitán o moderador/admin
+        public async Task<bool> DeleteTeamAsync(string teamId, string currentUserId, bool isModerator, CancellationToken cancellationToken)
+        {
+            var team = await _teamRepository.GetByIdAsync(teamId, cancellationToken);
+            if (team == null) return false;
+
+            if (!isModerator && team.CaptainId != currentUserId)
+            {
+                throw new UnauthorizedAccessException("Solo el capitán o un moderador pueden eliminar el equipo.");
+            }
+
+            return await _teamRepository.DeleteAsync(teamId, cancellationToken);
         }
 
         // RF-10: Actualizar información del equipo

@@ -21,9 +21,13 @@ namespace ProyectAPI.Services
             _userRepository = userRepository;
         }
 
-        public async Task<List<TournamentResponse>> GetAllTournamentsAsync(CancellationToken cancellationToken)
+        public async Task<List<TournamentResponse>> GetAllTournamentsAsync(CancellationToken cancellationToken) =>
+            await GetAllTournamentsAsync(null, null, null, null, cancellationToken);
+
+        // RF-19
+        public async Task<List<TournamentResponse>> GetAllTournamentsAsync(string? gameName, string? status, DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken)
         {
-            var tournaments = await _tournamentRepository.GetAllAsync(cancellationToken);
+            var tournaments = await _tournamentRepository.GetAllAsync(gameName, status, fromDate, toDate, cancellationToken);
             return tournaments.Select(MapToResponse).ToList();
         }
 
@@ -64,6 +68,75 @@ namespace ProyectAPI.Services
             await _tournamentRepository.CreateAsync(tournament, cancellationToken);
         }
 
+        // RF-17
+        public async Task<TournamentResponse?> UpdateTournamentAsync(string id, UpdateTournamentRequest request, CancellationToken cancellationToken)
+        {
+            var tournament = await _tournamentRepository.GetByIdAsync(id, cancellationToken);
+            if (tournament is null) return null;
+
+            if (tournament.Status != TournamentStatuses.Upcoming)
+            {
+                throw new InvalidOperationException("Solo se pueden modificar torneos que aún no han comenzado.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Title)) tournament.Title = request.Title.Trim();
+            if (!string.IsNullOrWhiteSpace(request.GameName)) tournament.GameName = request.GameName.Trim();
+            if (request.BannerUrl is not null) tournament.BannerUrl = request.BannerUrl;
+            if (request.PrizePool.HasValue) tournament.PrizePool = request.PrizePool.Value;
+            if (request.Rules is not null) tournament.Rules = request.Rules;
+            if (request.RankConditions is not null) tournament.RankConditions = request.RankConditions;
+
+            if (request.MaxParticipants.HasValue)
+            {
+                if (request.MaxParticipants.Value < tournament.Participants.Count)
+                    throw new InvalidOperationException("El cupo máximo no puede ser menor a la cantidad de inscritos.");
+                tournament.MaxParticipants = request.MaxParticipants.Value;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.TournamentType))
+            {
+                if (tournament.Participants.Count > 0)
+                    throw new InvalidOperationException("No se puede cambiar el tipo de torneo cuando ya hay inscritos.");
+                var type = request.TournamentType.Trim();
+                if (type != "Individual" && type != "Equipo")
+                    throw new InvalidOperationException("El tipo de torneo debe ser 'Individual' o 'Equipo'.");
+                tournament.TournamentType = type;
+            }
+
+            var newStart = request.StartDate?.ToUniversalTime() ?? tournament.StartDate;
+            var newEnd = request.EndDate?.ToUniversalTime() ?? tournament.EndDate;
+            if (newEnd < newStart)
+                throw new InvalidOperationException("La fecha de finalización no puede ser anterior a la fecha de inicio del torneo.");
+            tournament.StartDate = newStart;
+            tournament.EndDate = newEnd;
+
+            await _tournamentRepository.UpdateAsync(tournament, cancellationToken);
+            return MapToResponse(tournament);
+        }
+
+        // RF-18
+        public async Task<bool> CancelTournamentAsync(string id, CancellationToken cancellationToken)
+        {
+            var tournament = await _tournamentRepository.GetByIdAsync(id, cancellationToken);
+            if (tournament is null) return false;
+
+            if (tournament.Status == TournamentStatuses.Finished)
+                throw new InvalidOperationException("No se puede cancelar un torneo que ya finalizó.");
+            if (tournament.Status == TournamentStatuses.Cancelled)
+                return true;
+
+            return await _tournamentRepository.SetStatusAsync(id, TournamentStatuses.Cancelled, cancellationToken);
+        }
+
+        // RF-22
+        public async Task<bool> VerifyParticipantRankAsync(string tournamentId, string userId, bool verified, string? verifiedBy, CancellationToken cancellationToken)
+        {
+            var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
+            if (tournament is null) return false;
+            if (!tournament.Participants.Any(p => p.UserId == userId)) return false;
+            return await _tournamentRepository.SetParticipantRankVerificationAsync(tournamentId, userId, verified, verifiedBy, cancellationToken);
+        }
+
         public async Task<bool> RegisterParticipantAsync(string tournamentId, TournamentParticipantDto participantDto, CancellationToken cancellationToken)
         {
             var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
@@ -83,7 +156,7 @@ namespace ProyectAPI.Services
                 // Validar que el jugador tenga el juego asociado en su perfil con nombre y rango
                 var user = await _userRepository.GetByIdAsync(participantDto.UserId, cancellationToken);
                 var userGame = user?.Games?.FirstOrDefault(g => g.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase));
-                if (userGame is null || string.IsNullOrWhiteSpace(userGame.InGameName) || string.IsNullOrWhiteSpace(userGame.Rank))
+                if (user is null || userGame is null || string.IsNullOrWhiteSpace(userGame.InGameName) || string.IsNullOrWhiteSpace(userGame.Rank))
                 {
                     throw new InvalidOperationException("Debes tener el videojuego asociado a tu perfil con nombre de usuario y rango para inscribirte.");
                 }
@@ -92,8 +165,8 @@ namespace ProyectAPI.Services
                 {
                     UserId = participantDto.UserId,
                     Username = string.IsNullOrWhiteSpace(participantDto.Username) ? user.Username : participantDto.Username,
-                    InGameName = string.IsNullOrWhiteSpace(userGame.InGameName) ? participantDto.InGameName : userGame.InGameName,
-                    Rank = string.IsNullOrWhiteSpace(userGame.Rank) ? participantDto.Rank : userGame.Rank,
+                    InGameName = userGame.InGameName,
+                    Rank = userGame.Rank,
                     RegisteredAt = DateTime.UtcNow
                 };
 
@@ -242,10 +315,11 @@ namespace ProyectAPI.Services
 
             var disqualified = GetDisqualifiedIds(tournament);
             var winnerId = ResolveWinner(match, request, disqualified);
+            var previousWinnerId = match.WinnerUserId;
 
             // Si cambia el ganador pero el siguiente partido ya se jugó, hay que corregir ese primero
             var next = FindNextMatch(matches, match);
-            if (next is not null && next.Status == MatchStatuses.Finished && match.WinnerUserId != winnerId)
+            if (next is not null && next.Status == MatchStatuses.Finished && previousWinnerId != winnerId)
             {
                 throw new InvalidOperationException("El partido siguiente ya tiene resultado. Corregí ese resultado primero.");
             }
@@ -253,7 +327,49 @@ namespace ProyectAPI.Services
             match.ScoreA = request.ScoreA;
             match.ScoreB = request.ScoreB;
 
-            await ApplyWinnerAsync(tournament, matches, match, winnerId, false, disqualified, cancellationToken);
+            // RF-25 / RF-26 / RF-27: registrar o corregir el resultado define el ganador,
+            // pero el avance a la ronda siguiente es una acción manual del moderador (RF-28).
+            await SetWinnerAsync(match, winnerId, false, cancellationToken);
+
+            // Si el ganador anterior ya había sido avanzado, se corrige también su lugar.
+            if (next is not null && previousWinnerId is not null && previousWinnerId != winnerId)
+            {
+                var newWinner = GetSlotForWinner(match, winnerId);
+                if (newWinner is not null && TryReplaceAdvancedSlot(next, match.Position, previousWinnerId, newWinner))
+                {
+                    await _matchRepository.UpdateAsync(next, cancellationToken);
+                }
+            }
+
+            return MapMatches(matches);
+        }
+
+        // RF-28: pasa manualmente al ganador de un partido ya finalizado a la ronda siguiente.
+        public async Task<List<MatchResponse>?> AdvanceWinnerAsync(string tournamentId, string matchId, CancellationToken cancellationToken)
+        {
+            var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
+            if (tournament is null) return null;
+
+            var matches = await _matchRepository.GetByTournamentAsync(tournamentId, cancellationToken);
+            var match = matches.FirstOrDefault(m => m.Id == matchId);
+            if (match is null) return null;
+
+            if (tournament.Status != TournamentStatuses.InProgress && tournament.Status != TournamentStatuses.Finished)
+            {
+                throw new InvalidOperationException("El torneo no está en juego.");
+            }
+
+            if (match.IsBye)
+            {
+                throw new InvalidOperationException("Este jugador pasó directo de ronda: no hay ganador para avanzar.");
+            }
+
+            if (match.Status != MatchStatuses.Finished || string.IsNullOrWhiteSpace(match.WinnerUserId))
+            {
+                throw new InvalidOperationException("Primero registrá el resultado del partido para definir un ganador.");
+            }
+
+            await AdvanceWinnerToNextAsync(tournament, matches, match, GetDisqualifiedIds(tournament), cancellationToken);
             return MapMatches(matches);
         }
 
@@ -308,8 +424,8 @@ namespace ProyectAPI.Services
             }
             else
             {
-                var disqualified = GetDisqualifiedIds(tournament);
-                await ApplyWinnerAsync(tournament, matches, match, winnerId, false, disqualified, cancellationToken);
+                // Al llegar al puntaje de victoria se define el ganador, pero el avance sigue siendo manual.
+                await SetWinnerAsync(match, winnerId, false, cancellationToken);
             }
 
             return MapMatches(matches);
@@ -362,24 +478,28 @@ namespace ProyectAPI.Services
 
         // ----- Lógica común de llaves -----
 
-        // Define al ganador de un partido y lo avanza a la ronda siguiente.
-        // Si era la final, el torneo termina.
-        private async Task ApplyWinnerAsync(
-            Tournament tournament,
-            List<TournamentMatch> matches,
+        // Define al ganador y marca el partido como finalizado, sin avanzar de ronda.
+        private async Task SetWinnerAsync(
             TournamentMatch match,
             string winnerId,
             bool isWalkover,
-            HashSet<string> disqualified,
             CancellationToken cancellationToken)
         {
-            var previousWinnerId = match.WinnerUserId;
-
             match.WinnerUserId = winnerId;
             match.Status = MatchStatuses.Finished;
             match.IsWalkover = isWalkover;
             await _matchRepository.UpdateAsync(match, cancellationToken);
+        }
 
+        // Pasa al ganador a la ronda siguiente. Si era la final, el torneo termina.
+        private async Task AdvanceWinnerToNextAsync(
+            Tournament tournament,
+            List<TournamentMatch> matches,
+            TournamentMatch match,
+            HashSet<string> disqualified,
+            CancellationToken cancellationToken)
+        {
+            var winnerId = match.WinnerUserId!;
             var next = FindNextMatch(matches, match);
 
             if (next is null)
@@ -390,20 +510,20 @@ namespace ProyectAPI.Services
                 return;
             }
 
-            // Se pone al ganador en el lugar que le corresponde del partido siguiente
-            if (previousWinnerId != winnerId)
+            if (next.Status == MatchStatuses.Finished)
             {
-                var winner = match.PlayerA!.UserId == winnerId ? match.PlayerA : match.PlayerB!;
-                var slot = new MatchSlot
-                {
-                    UserId = winner.UserId,
-                    Username = winner.Username,
-                    InGameName = winner.InGameName
-                };
+                throw new InvalidOperationException("El partido siguiente ya tiene resultado.");
+            }
 
-                if (match.Position % 2 == 0) next.PlayerA = slot;
-                else next.PlayerB = slot;
+            var winner = GetSlotForWinner(match, winnerId);
+            if (winner is null)
+            {
+                throw new InvalidOperationException("No se pudo identificar al ganador del partido.");
+            }
 
+            // Se pone al ganador en el lugar que le corresponde del partido siguiente
+            if (SetNextSlot(next, match.Position, winner))
+            {
                 await _matchRepository.UpdateAsync(next, cancellationToken);
             }
 
@@ -411,7 +531,8 @@ namespace ProyectAPI.Services
             await ResolveDisqualifiedAsync(tournament, matches, next, disqualified, cancellationToken);
         }
 
-        // Si en un partido exactamente uno de los dos está descalificado, gana el otro (walkover)
+        // Si en un partido exactamente uno de los dos está descalificado, gana el otro (walkover).
+        // El walkover sí avanza automáticamente al ganador.
         private async Task ResolveDisqualifiedAsync(
             Tournament tournament,
             List<TournamentMatch> matches,
@@ -429,7 +550,48 @@ namespace ProyectAPI.Services
             if (aOut == bOut) return;
 
             var winnerId = aOut ? match.PlayerB.UserId : match.PlayerA.UserId;
-            await ApplyWinnerAsync(tournament, matches, match, winnerId, true, disqualified, cancellationToken);
+            await SetWinnerAsync(match, winnerId, true, cancellationToken);
+            await AdvanceWinnerToNextAsync(tournament, matches, match, disqualified, cancellationToken);
+        }
+
+        private static MatchSlot? GetSlotForWinner(TournamentMatch match, string winnerId)
+        {
+            if (match.PlayerA?.UserId == winnerId) return match.PlayerA;
+            if (match.PlayerB?.UserId == winnerId) return match.PlayerB;
+            return null;
+        }
+
+        private static MatchSlot CloneSlot(MatchSlot slot) => new()
+        {
+            UserId = slot.UserId,
+            Username = slot.Username,
+            InGameName = slot.InGameName,
+            TeamId = slot.TeamId,
+            TeamName = slot.TeamName
+        };
+
+        // Coloca al ganador en el partido siguiente. Devuelve false si ya estaba ahí.
+        private static bool SetNextSlot(TournamentMatch next, int position, MatchSlot winner)
+        {
+            var current = position % 2 == 0 ? next.PlayerA : next.PlayerB;
+            if (current is not null && current.UserId == winner.UserId) return false;
+
+            var slot = CloneSlot(winner);
+            if (position % 2 == 0) next.PlayerA = slot;
+            else next.PlayerB = slot;
+            return true;
+        }
+
+        // Al corregir un resultado, reemplaza el lugar del ganador anterior solo si ya había avanzado.
+        private static bool TryReplaceAdvancedSlot(TournamentMatch next, int position, string previousWinnerId, MatchSlot newWinner)
+        {
+            var current = position % 2 == 0 ? next.PlayerA : next.PlayerB;
+            if (current is null || current.UserId != previousWinnerId) return false;
+
+            var slot = CloneSlot(newWinner);
+            if (position % 2 == 0) next.PlayerA = slot;
+            else next.PlayerB = slot;
+            return true;
         }
 
         private static void EnsureMatchCanBeEdited(Tournament tournament, TournamentMatch match)
@@ -555,6 +717,9 @@ namespace ProyectAPI.Services
                         p.RegisteredAt,
                         p.IsDisqualified,
                         p.DisqualificationReason,
+                        p.RankVerified,
+                        p.RankVerifiedBy,
+                        p.RankVerifiedAt,
                         p.TeamId,
                         p.TeamName))
                     .ToList()
@@ -586,6 +751,8 @@ namespace ProyectAPI.Services
         }
 
         private static MatchSlotDto? MapSlot(MatchSlot? slot) =>
-            slot is null ? null : new MatchSlotDto(slot.UserId, slot.Username, slot.InGameName);
+            slot is null
+                ? null
+                : new MatchSlotDto(slot.UserId, slot.Username, slot.InGameName, slot.TeamId, slot.TeamName);
     }
 }

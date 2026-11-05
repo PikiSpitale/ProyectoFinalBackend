@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace ProyectAPI.Models
 {
+    [BsonIgnoreExtraElements]
     public class Team
     {
         [BsonId]

@@ -95,7 +95,9 @@ namespace ProyectAPI.Services
         {
             UserId = p.UserId,
             Username = p.Username,
-            InGameName = p.InGameName
+            InGameName = p.InGameName,
+            TeamId = p.TeamId,
+            TeamName = p.TeamName
         };
 
         private static void Shuffle<T>(IList<T> list, Random random)

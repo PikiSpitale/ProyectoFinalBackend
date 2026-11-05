@@ -98,12 +98,7 @@ public sealed class AuthService : IAuthService
         else if (!string.IsNullOrWhiteSpace(request.Username))
         {
             var username = request.Username.Trim();
-            // No hay método GetByUsername en el repo actual; buscar por email no aplica. Intentamos por username con scan básico? 
-            // Repositorio tiene ExistsByUsername; mejor obtener todos no es ideal, pero seguimos patrón actual.
-            // Intentamos fallback: si no hay email, buscamos por username cargando por lista vía método no expuesto; en su lugar, intentamos GetByEmail con username? no.
-            // Usamos repo pattern existente: intentar obtener por email si parece email, sino no hay. Para cumplir con "credenciales", exigimos email si no hay otro método.
-            // Como alternativa, buscar en colección vía contexto no está aquí; pero el repo actual expone GetByEmail/GetById.
-            // Dejamos como está: si no hay email, fallará y devolverá InvalidCredentialsException.
+            user = await _userRepository.GetByUsernameAsync(username, cancellationToken);
         }
 
         if (user == null || string.IsNullOrWhiteSpace(user.PasswordHash) || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))

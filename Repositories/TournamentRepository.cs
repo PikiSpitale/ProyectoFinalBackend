@@ -17,7 +17,23 @@ namespace ProyectAPI.Repositories
 
         // Obtener lista completa de torneos
         public async Task<List<Tournament>> GetAllAsync(CancellationToken cancellationToken) =>
-            await _tournamentsCollection.Find(_ => true).ToListAsync(cancellationToken);
+            await GetAllAsync(null, null, null, null, cancellationToken);
+
+        // RF-19: consulta y filtrado de torneos
+        public async Task<List<Tournament>> GetAllAsync(string? gameName, string? status, DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken)
+        {
+            var filter = Builders<Tournament>.Filter.Empty;
+            if (!string.IsNullOrWhiteSpace(gameName))
+                filter &= Builders<Tournament>.Filter.Eq(t => t.GameName, gameName);
+            if (!string.IsNullOrWhiteSpace(status))
+                filter &= Builders<Tournament>.Filter.Eq(t => t.Status, status);
+            if (fromDate.HasValue)
+                filter &= Builders<Tournament>.Filter.Gte(t => t.StartDate, fromDate.Value.ToUniversalTime());
+            if (toDate.HasValue)
+                filter &= Builders<Tournament>.Filter.Lte(t => t.StartDate, toDate.Value.ToUniversalTime());
+
+            return await _tournamentsCollection.Find(filter).SortBy(t => t.StartDate).ToListAsync(cancellationToken);
+        }
 
         // Obtener un torneo por su ID
         public async Task<Tournament?> GetByIdAsync(string id, CancellationToken cancellationToken) =>
@@ -50,11 +66,25 @@ namespace ProyectAPI.Repositories
             return result.ModifiedCount > 0;
         }
 
+        // RF-17: actualizar torneo
+        public async Task<bool> UpdateAsync(Tournament tournament, CancellationToken cancellationToken)
+        {
+            var result = await _tournamentsCollection.ReplaceOneAsync(t => t.Id == tournament.Id, tournament, new ReplaceOptions(), cancellationToken);
+            return result.ModifiedCount > 0 || result.MatchedCount > 0;
+        }
+
         // Eliminar un torneo por su ID
         public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken)
         {
             var result = await _tournamentsCollection.DeleteOneAsync(t => t.Id == id, cancellationToken);
             return result.DeletedCount > 0;
+        }
+
+        public async Task<bool> SetStatusAsync(string id, string newStatus, CancellationToken cancellationToken)
+        {
+            var update = Builders<Tournament>.Update.Set(t => t.Status, newStatus);
+            var result = await _tournamentsCollection.UpdateOneAsync(t => t.Id == id, update, null, cancellationToken);
+            return result.ModifiedCount > 0 || result.MatchedCount > 0;
         }
 
         // Cambia el estado de forma atómica: solo si el estado actual coincide con el esperado
@@ -91,6 +121,54 @@ namespace ProyectAPI.Repositories
 
             var result = await _tournamentsCollection.UpdateOneAsync(filter, update, null, cancellationToken);
             return result.ModifiedCount > 0;
+        }
+
+        // RF-22: verificación manual de rango
+        public async Task<bool> SetParticipantRankVerificationAsync(string tournamentId, string userId, bool verified, string? verifiedBy, CancellationToken cancellationToken)
+        {
+            var filter = Builders<Tournament>.Filter.And(
+                Builders<Tournament>.Filter.Eq(t => t.Id, tournamentId),
+                Builders<Tournament>.Filter.ElemMatch(t => t.Participants, p => p.UserId == userId)
+            );
+
+            var update = Builders<Tournament>.Update.Combine(
+                Builders<Tournament>.Update.Set(t => t.Participants[-1].RankVerified, verified),
+                Builders<Tournament>.Update.Set(t => t.Participants[-1].RankVerifiedBy, verifiedBy),
+                Builders<Tournament>.Update.Set(t => t.Participants[-1].RankVerifiedAt, verified ? DateTime.UtcNow : null)
+            );
+
+            var result = await _tournamentsCollection.UpdateOneAsync(filter, update, null, cancellationToken);
+            return result.ModifiedCount > 0;
+        }
+
+        // RF-08: bloquea la eliminación del juego si hay un torneo en curso donde el usuario participa
+        public async Task<bool> HasInProgressTournamentWithGameAsync(string gameName, string userId, CancellationToken cancellationToken)
+        {
+            var filter = Builders<Tournament>.Filter.And(
+                Builders<Tournament>.Filter.Eq(t => t.Status, TournamentStatuses.InProgress),
+                Builders<Tournament>.Filter.Eq(t => t.GameName, gameName),
+                Builders<Tournament>.Filter.ElemMatch(t => t.Participants, p => p.UserId == userId)
+            );
+
+            return await _tournamentsCollection.Find(filter).AnyAsync(cancellationToken);
+        }
+
+        // RF-08: limpia las inscripciones del usuario en torneos que todavía no comenzaron
+        public async Task<long> RemoveParticipantFromUpcomingTournamentsAsync(string gameName, string userId, CancellationToken cancellationToken)
+        {
+            var filter = Builders<Tournament>.Filter.And(
+                Builders<Tournament>.Filter.Eq(t => t.Status, TournamentStatuses.Upcoming),
+                Builders<Tournament>.Filter.Eq(t => t.GameName, gameName),
+                Builders<Tournament>.Filter.ElemMatch(t => t.Participants, p => p.UserId == userId)
+            );
+
+            var update = Builders<Tournament>.Update.PullFilter(
+                t => t.Participants,
+                p => p.UserId == userId
+            );
+
+            var result = await _tournamentsCollection.UpdateManyAsync(filter, update, null, cancellationToken);
+            return result.ModifiedCount;
         }
     }
 }
