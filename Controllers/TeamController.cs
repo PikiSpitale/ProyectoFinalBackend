@@ -193,5 +193,72 @@ namespace ProyectAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        // RF-11: invitar usuario (solo capitán)
+        [HttpPost("{id}/invitations")]
+        [Authorize]
+        public async Task<ActionResult> Invite(string id, [FromBody] InviteTeamMemberDto dto, CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            try
+            {
+                var invitation = await _teamService.InviteMemberAsync(id, dto.Username, userId, cancellationToken);
+                return Ok(invitation);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // RF-11: invitaciones pendientes del equipo (solo capitán)
+        [HttpGet("{id}/invitations")]
+        [Authorize]
+        public async Task<ActionResult> GetTeamInvitations(string id, CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            try
+            {
+                var invitations = await _teamService.GetTeamInvitationsAsync(id, userId, cancellationToken);
+                return Ok(invitations);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // RF-12: mis invitaciones pendientes
+        [HttpGet("invitations/me")]
+        [Authorize]
+        public async Task<ActionResult> GetMyInvitations(CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            var invitations = await _teamService.GetMyInvitationsAsync(userId, cancellationToken);
+            return Ok(invitations);
+        }
+
+        // RF-12: aceptar/rechazar invitación
+        [HttpPost("invitations/{invitationId}/respond")]
+        [Authorize]
+        public async Task<ActionResult> RespondInvitation(string invitationId, [FromBody] RespondTeamInvitationDto dto, CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            try
+            {
+                await _teamService.RespondInvitationAsync(invitationId, userId, dto.Response, cancellationToken);
+                return Ok(new { message = dto.Response.Equals("Accept", StringComparison.OrdinalIgnoreCase) || dto.Response.Equals("Aceptar", StringComparison.OrdinalIgnoreCase)
+                    ? "Invitación aceptada. Ya sos parte del equipo."
+                    : "Invitación rechazada." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

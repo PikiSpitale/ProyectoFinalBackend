@@ -20,8 +20,28 @@ namespace ProyectAPI.Models
 
         public string CaptainId { get; set; } = string.Empty;
 
+        // InviteOnly (RF-11) | Open (unión pública con filtro opcional). Vacío = legado -> Open.
+        public string JoinPolicy { get; set; } = string.Empty;
+        // None | Fixed | Minimum (aplica cuando JoinPolicy = Open)
+        public string RankFilterType { get; set; } = TeamRankFilterType.None;
+        // Rango fijo o rango mínimo (según RankFilterType)
+        public string? RankFilterValue { get; set; }
+
         public List<TeamMember> Members { get; set; } = new();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    public static class TeamJoinPolicy
+    {
+        public const string InviteOnly = "InviteOnly";
+        public const string Open = "Open";
+    }
+
+    public static class TeamRankFilterType
+    {
+        public const string None = "None";
+        public const string Fixed = "Fixed";
+        public const string Minimum = "Minimum";
     }
 }

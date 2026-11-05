@@ -55,6 +55,7 @@ builder.Services.AddScoped<IMatchStatsService, MatchStatsService>();
 
 // Registro de dependencias para el Módulo de Equipos
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<ITeamInvitationRepository, TeamInvitationRepository>();
 builder.Services.AddScoped<TeamService>();
 
 // Registro de dependencias para el Módulo de Rankings
