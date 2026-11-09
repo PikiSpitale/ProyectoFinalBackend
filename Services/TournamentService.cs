@@ -140,90 +140,90 @@ namespace ProyectAPI.Services
         public async Task<bool> RegisterParticipantAsync(string tournamentId, TournamentParticipantDto participantDto, CancellationToken cancellationToken)
         {
             var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
-            if (tournament is null) return false;
+            if (tournament is null) throw new InvalidOperationException("Torneo no encontrado.");
 
-            // La inscripción solo está abierta mientras el torneo no haya comenzado
-            if (tournament.Status != TournamentStatuses.Upcoming) return false;
-            if (tournament.Participants.Count >= tournament.MaxParticipants) return false;
+            if (tournament.Status != TournamentStatuses.Upcoming)
+                throw new InvalidOperationException("La inscripción no está disponible: el torneo ya comenzó, finalizó o fue cancelado.");
 
-            // Ventana de inscripción: habilitar 30 minutos antes del inicio
-            if (DateTime.UtcNow < tournament.StartDate.AddMinutes(-30)) return false;
+            if (tournament.Participants.Count >= tournament.MaxParticipants)
+                throw new InvalidOperationException("No hay cupos disponibles en este torneo.");
 
-            if (tournament.TournamentType == "Individual")
-            {
-                if (tournament.Participants.Any(p => p.UserId == participantDto.UserId)) return false;
+            var opensAt = tournament.StartDate.AddMinutes(-30);
+            if (DateTime.UtcNow < opensAt)
+                throw new InvalidOperationException($"La inscripción se habilita 30 minutos antes del inicio ({opensAt.ToLocalTime():g}).");
 
-                // Validar que el jugador tenga el juego asociado en su perfil con nombre y rango
-                var user = await _userRepository.GetByIdAsync(participantDto.UserId, cancellationToken);
-                var userGame = user?.Games?.FirstOrDefault(g => g.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase));
-                if (user is null || userGame is null || string.IsNullOrWhiteSpace(userGame.InGameName) || string.IsNullOrWhiteSpace(userGame.Rank))
-                {
-                    throw new InvalidOperationException("Debes tener el videojuego asociado a tu perfil con nombre de usuario y rango para inscribirte.");
-                }
-
-                var participant = new TournamentParticipant
-                {
-                    UserId = participantDto.UserId,
-                    Username = string.IsNullOrWhiteSpace(participantDto.Username) ? user.Username : participantDto.Username,
-                    InGameName = userGame.InGameName,
-                    Rank = userGame.Rank,
-                    RegisteredAt = DateTime.UtcNow
-                };
-
-                return await _tournamentRepository.AddParticipantAsync(tournamentId, participant, cancellationToken);
-            }
-            else if (tournament.TournamentType == "Equipo")
-            {
+            if (tournament.TournamentType == "Equipo")
                 throw new InvalidOperationException("Para inscribirse a un torneo por equipos, debés usar el endpoint de inscripción por equipo.");
-            }
 
-            return false;
+            if (tournament.Participants.Any(p => p.UserId == participantDto.UserId))
+                throw new InvalidOperationException("Ya estás inscripto en este torneo.");
+
+            var user = await _userRepository.GetByIdAsync(participantDto.UserId, cancellationToken);
+            var userGame = user?.Games?.FirstOrDefault(g => g.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase));
+            if (user is null || userGame is null || string.IsNullOrWhiteSpace(userGame.InGameName) || string.IsNullOrWhiteSpace(userGame.Rank))
+                throw new InvalidOperationException("Debes tener el videojuego asociado a tu perfil con nombre de usuario y rango para inscribirte.");
+
+            // RF-20: verificar límites de rango cuando la condición es interpretable automáticamente
+            ValidateRankCondition(tournament, userGame.Rank, user.Username ?? "Jugador");
+
+            var participant = new TournamentParticipant
+            {
+                UserId = participantDto.UserId,
+                Username = string.IsNullOrWhiteSpace(participantDto.Username) ? user.Username : participantDto.Username,
+                InGameName = userGame.InGameName,
+                Rank = userGame.Rank,
+                RegisteredAt = DateTime.UtcNow
+            };
+
+            var added = await _tournamentRepository.AddParticipantAsync(tournamentId, participant, cancellationToken);
+            if (!added)
+                throw new InvalidOperationException("No se pudo completar la inscripción. Verificá que sigas cumpliendo los requisitos e intentá de nuevo.");
+            return true;
         }
 
         public async Task<bool> RegisterTeamAsync(string tournamentId, string teamId, string currentUserId, CancellationToken cancellationToken)
         {
             var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
-            if (tournament is null) return false;
+            if (tournament is null) throw new InvalidOperationException("Torneo no encontrado.");
 
-            if (tournament.Status != TournamentStatuses.Upcoming) return false;
-            if (tournament.Participants.Count >= tournament.MaxParticipants) return false;
-            if (DateTime.UtcNow < tournament.StartDate.AddMinutes(-30)) return false;
+            if (tournament.Status != TournamentStatuses.Upcoming)
+                throw new InvalidOperationException("La inscripción no está disponible: el torneo ya comenzó, finalizó o fue cancelado.");
+
+            if (tournament.Participants.Count >= tournament.MaxParticipants)
+                throw new InvalidOperationException("No hay cupos disponibles en este torneo.");
+
+            var opensAt = tournament.StartDate.AddMinutes(-30);
+            if (DateTime.UtcNow < opensAt)
+                throw new InvalidOperationException($"La inscripción se habilita 30 minutos antes del inicio ({opensAt.ToLocalTime():g}).");
 
             if (tournament.TournamentType != "Equipo")
-            {
                 throw new InvalidOperationException("Este torneo es individual.");
-            }
 
-            if (tournament.Participants.Any(p => p.TeamId == teamId)) return false;
+            if (tournament.Participants.Any(p => p.TeamId == teamId))
+                throw new InvalidOperationException("Este equipo ya está inscripto en el torneo.");
 
             var team = await _teamRepository.GetByIdAsync(teamId, cancellationToken);
             if (team == null) throw new InvalidOperationException("Equipo no encontrado.");
             if (team.CaptainId != currentUserId) throw new InvalidOperationException("Solo el capitán puede inscribir el equipo al torneo.");
             if (!string.IsNullOrWhiteSpace(team.GameName) && !team.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase))
-            {
                 throw new InvalidOperationException("El equipo debe pertenecer al mismo videojuego que el torneo.");
-            }
 
-            // Requerido: 5 titulares + 2 suplentes
             var starters = team.Members.Where(m => m.IsStarter).ToList();
             var substitutes = team.Members.Where(m => !m.IsStarter).ToList();
             if (starters.Count != 5 || substitutes.Count != 2)
-            {
                 throw new InvalidOperationException("El equipo debe tener exactamente 5 titulares y 2 suplentes para inscribirse a torneos grupales.");
-            }
 
-            // Verificar que todos los integrantes tengan el juego con in-game name y rango
             foreach (var member in team.Members)
             {
                 var memberUser = await _userRepository.GetByIdAsync(member.UserId, cancellationToken);
                 var mg = memberUser?.Games?.FirstOrDefault(g => g.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase));
                 if (mg is null || string.IsNullOrWhiteSpace(mg.InGameName) || string.IsNullOrWhiteSpace(mg.Rank))
-                {
                     throw new InvalidOperationException($"El integrante {member.Username} debe tener el videojuego asociado con nombre de usuario y rango.");
-                }
+
+                // RF-20/RF-21: verificar límites de rango de los integrantes cuando es interpretable
+                ValidateRankCondition(tournament, mg.Rank, member.Username ?? "Integrante");
             }
 
-            // Inscribir al equipo: según modelo actual de participantes, se agrega un registro por equipo (representante)
             var captain = team.Members.FirstOrDefault(m => m.UserId == team.CaptainId);
             var captainUser = captain is null ? null : await _userRepository.GetByIdAsync(captain.UserId, cancellationToken);
             var captainGame = captainUser?.Games?.FirstOrDefault(g => g.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase));
@@ -239,7 +239,10 @@ namespace ProyectAPI.Services
                 TeamName = team.Name
             };
 
-            return await _tournamentRepository.AddParticipantAsync(tournamentId, participant, cancellationToken);
+            var added = await _tournamentRepository.AddParticipantAsync(tournamentId, participant, cancellationToken);
+            if (!added)
+                throw new InvalidOperationException("No se pudo completar la inscripción. Verificá que sigas cumpliendo los requisitos e intentá de nuevo.");
+            return true;
         }
 
         public async Task<bool> DeleteTournamentAsync(string id, CancellationToken cancellationToken)
@@ -688,6 +691,47 @@ namespace ProyectAPI.Services
                 await _tournamentRepository.TryChangeStatusAsync(
                     tournament.Id, TournamentStatuses.InProgress, TournamentStatuses.Upcoming, CancellationToken.None);
                 throw;
+            }
+        }
+
+        // RF-20: verificación automática de límites de rango cuando la condición es interpretable.
+        // Casos ambiguos/no reconocibles se dejan para verificación manual (RF-22).
+        private static void ValidateRankCondition(Tournament tournament, string userRank, string who)
+        {
+            var cond = (tournament.RankConditions ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(cond)) return;
+
+            var lower = cond.ToLowerInvariant();
+            if (lower is "-" or "n/a" || lower.Contains("libre") || lower.Contains("todos") || lower.Contains("sin restric") || lower.Contains("cualquiera") || lower.Contains("abierto") || lower.Contains("ningun"))
+                return;
+
+            if (!GameRankLadders.HasLadder(tournament.GameName)) return;
+            if (string.IsNullOrWhiteSpace(userRank)) return;
+
+            var minIntent = lower.Contains("mínimo") || lower.Contains("minimo") || lower.Contains("minimum") || lower.Contains("al menos") || lower.Contains("desde") || lower.Contains("superior") || lower.Contains(" o mas") || lower.Contains(" o más") || lower.Contains(">=") || cond.TrimEnd().EndsWith("+");
+            var fixedIntent = lower.Contains("fijo") || lower.Contains("exacto") || lower.Contains("únicamente igual") || lower.Contains("unicamente igual");
+
+            // Extraer rango candidato quitando prefijos comunes
+            var candidate = cond;
+            candidate = System.Text.RegularExpressions.Regex.Replace(candidate, @"(?i)^(condici[oó]n(es)?\s*(de\s*rango)?\s*[:\-]\s*)", "");
+            candidate = System.Text.RegularExpressions.Regex.Replace(candidate, @"(?i)\b(rango\s*m[ií]nimo|m[ií]nimo|minimum|min|rango\s*fijo|fijo|exacto|solo|rango|al\s*menos|desde)\b\s*[:\-]?", "");
+            candidate = candidate.Replace(">=", "").Replace(">", "").Trim().TrimEnd('+').Trim();
+            // Quitar sufijos tipo "o superior"
+            candidate = System.Text.RegularExpressions.Regex.Replace(candidate, @"(?i)\s*(o\s+superior|o\s+m[aá]s|en\s+adelante).*$", "").Trim();
+
+            if (!GameRankLadders.IsRecognizedRank(tournament.GameName, candidate)) return;
+
+            if (fixedIntent && !minIntent)
+            {
+                if (!GameRankLadders.MatchesFixed(tournament.GameName, candidate, userRank))
+                    throw new InvalidOperationException($"No cumple la condición de rango del torneo ({cond}). Se requiere exactamente {candidate} para {who}.");
+                return;
+            }
+
+            if (minIntent)
+            {
+                if (!GameRankLadders.MeetsMinimum(tournament.GameName, candidate, userRank))
+                    throw new InvalidOperationException($"No cumple la condición de rango del torneo ({cond}). Se requiere al menos {candidate} para {who} (rango actual: {userRank}).");
             }
         }
 
