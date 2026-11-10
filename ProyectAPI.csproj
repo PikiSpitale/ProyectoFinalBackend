@@ -5,6 +5,14 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>85a01090-0a92-4f21-bf9b-3913d0bb3044</UserSecretsId>
 	</PropertyGroup>
+	<!-- tools/ tiene proyectos auxiliares (dbtool) que no forman parte de la API.
+	     Sin esto, el glob del SDK compila sus fuentes y sus obj/ generados. -->
+	<ItemGroup>
+		<Compile Remove="tools/**" />
+		<Content Remove="tools/**" />
+		<None Remove="tools/**" />
+		<EmbeddedResource Remove="tools/**" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.0" />
