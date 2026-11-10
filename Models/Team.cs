@@ -27,6 +27,14 @@ namespace ProyectAPI.Models
         // Rango fijo o rango mínimo (según RankFilterType)
         public string? RankFilterValue { get; set; }
 
+        // Ranking propio de la plataforma para torneos por equipo.
+        public int Points { get; set; } = 0;
+        public int TournamentsPlayed { get; set; } = 0;
+        public int TournamentsWon { get; set; } = 0;
+        public int MatchesPlayed { get; set; } = 0;
+        public int MatchesWon { get; set; } = 0;
+        public int MatchesLost { get; set; } = 0;
+
         public List<TeamMember> Members { get; set; } = new();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

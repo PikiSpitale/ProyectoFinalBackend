@@ -12,13 +12,23 @@ namespace ProyectAPI.Services
         private readonly IMatchRepository _matchRepository;
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
+        private readonly RankingService _rankingService;
+        private readonly ILogger<TournamentService> _logger;
 
-        public TournamentService(ITournamentRepository tournamentRepository, IMatchRepository matchRepository, ITeamRepository teamRepository, IUserRepository userRepository)
+        public TournamentService(
+            ITournamentRepository tournamentRepository,
+            IMatchRepository matchRepository,
+            ITeamRepository teamRepository,
+            IUserRepository userRepository,
+            RankingService rankingService,
+            ILogger<TournamentService> logger)
         {
             _tournamentRepository = tournamentRepository;
             _matchRepository = matchRepository;
             _teamRepository = teamRepository;
             _userRepository = userRepository;
+            _rankingService = rankingService;
+            _logger = logger;
         }
 
         public async Task<List<TournamentResponse>> GetAllTournamentsAsync(CancellationToken cancellationToken) =>
@@ -168,7 +178,14 @@ namespace ProyectAPI.Services
             if (tournament.Status == TournamentStatuses.Cancelled)
                 return true;
 
-            return await _tournamentRepository.SetStatusAsync(id, TournamentStatuses.Cancelled, cancellationToken);
+            var cancelled = await _tournamentRepository.SetStatusAsync(id, TournamentStatuses.Cancelled, cancellationToken);
+            if (cancelled)
+            {
+                // Un torneo cancelado no otorga puntos de ranking.
+                await RebuildRankingAsync(id, cancellationToken);
+            }
+
+            return cancelled;
         }
 
         // RF-22
@@ -296,6 +313,7 @@ namespace ProyectAPI.Services
             if (deleted)
             {
                 await _matchRepository.DeleteByTournamentAsync(id, cancellationToken);
+                await _rankingService.RemoveTournamentAsync(id, cancellationToken);
             }
 
             return deleted;
@@ -387,6 +405,7 @@ namespace ProyectAPI.Services
                 }
             }
 
+            await RebuildRankingAsync(tournamentId, cancellationToken);
             return MapMatches(matches);
         }
 
@@ -416,6 +435,7 @@ namespace ProyectAPI.Services
             }
 
             await AdvanceWinnerToNextAsync(tournament, matches, match, GetDisqualifiedIds(tournament), cancellationToken);
+            await RebuildRankingAsync(tournamentId, cancellationToken);
             return MapMatches(matches);
         }
 
@@ -474,6 +494,7 @@ namespace ProyectAPI.Services
                 await SetWinnerAsync(match, winnerId, false, cancellationToken);
             }
 
+            await RebuildRankingAsync(tournamentId, cancellationToken);
             return MapMatches(matches);
         }
 
@@ -519,6 +540,7 @@ namespace ProyectAPI.Services
                 await ResolveDisqualifiedAsync(tournament, matches, pending, disqualified, cancellationToken);
             }
 
+            await RebuildRankingAsync(tournamentId, cancellationToken);
             return MapMatches(matches);
         }
 
@@ -696,6 +718,20 @@ namespace ProyectAPI.Services
         private static HashSet<string> GetDisqualifiedIds(Tournament tournament) =>
             tournament.Participants.Where(p => p.IsDisqualified).Select(p => p.UserId).ToHashSet();
 
+        // El ranking no debe romper la operación del torneo: si falla, se registra
+        // el error y se deja el torneo consistente para el próximo recálculo.
+        private async Task RebuildRankingAsync(string tournamentId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _rankingService.RebuildTournamentAsync(tournamentId, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "No se pudo actualizar el ranking del torneo {TournamentId}.", tournamentId);
+            }
+        }
+
         // Valida, reserva el torneo de forma atómica y guarda las llaves
         private async Task<List<TournamentMatch>> BuildAndSaveBracketAsync(Tournament tournament, CancellationToken cancellationToken)
         {
@@ -725,6 +761,8 @@ namespace ProyectAPI.Services
             {
                 var matches = BracketGenerator.Generate(tournament);
                 await _matchRepository.InsertManyAsync(matches, cancellationToken);
+                // El torneo pasó a "En curso": ya corresponde acreditar la participación.
+                await RebuildRankingAsync(tournament.Id, cancellationToken);
                 return matches;
             }
             catch

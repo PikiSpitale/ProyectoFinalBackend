@@ -9,12 +9,18 @@ namespace ProyectAPI.Services
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
         private readonly ITeamInvitationRepository _invitationRepository;
+        private readonly RankingService _rankingService;
 
-        public TeamService(ITeamRepository teamRepository, IUserRepository userRepository, ITeamInvitationRepository invitationRepository)
+        public TeamService(
+            ITeamRepository teamRepository,
+            IUserRepository userRepository,
+            ITeamInvitationRepository invitationRepository,
+            RankingService rankingService)
         {
             _teamRepository = teamRepository;
             _userRepository = userRepository;
             _invitationRepository = invitationRepository;
+            _rankingService = rankingService;
         }
 
         public async Task<List<Team>> GetAllTeamsAsync(CancellationToken cancellationToken) =>
@@ -182,7 +188,15 @@ namespace ProyectAPI.Services
                 throw new UnauthorizedAccessException("Solo el capitán o un moderador pueden eliminar el equipo.");
             }
 
-            return await _teamRepository.DeleteAsync(teamId, cancellationToken);
+            var deleted = await _teamRepository.DeleteAsync(teamId, cancellationToken);
+            if (deleted)
+            {
+                // El equipo deja de existir: se retira su propio historial de ranking.
+                // Los puntos individuales de sus integrantes se conservan.
+                await _rankingService.RemoveTeamAsync(teamId, cancellationToken);
+            }
+
+            return deleted;
         }
 
         // RF-10
@@ -253,10 +267,61 @@ namespace ProyectAPI.Services
             var member = team.Members.FirstOrDefault(m => m.UserId == memberUserId);
             if (member == null) return false;
 
-            member.Role = newRole;
-            member.IsStarter = isStarter;
+            var role = NormalizeTeamRole(newRole);
+            var currentCaptain = team.Members.FirstOrDefault(m => m.UserId == team.CaptainId);
+            var isCurrentCaptain = member.UserId == team.CaptainId;
 
+            if (role == "Captain")
+            {
+                // Solo puede haber un capitán: el anterior pasa a miembro.
+                foreach (var other in team.Members.Where(m => m.UserId != member.UserId))
+                {
+                    if (string.Equals(other.Role, "Captain", StringComparison.OrdinalIgnoreCase))
+                    {
+                        other.Role = "Member";
+                    }
+                }
+
+                if (currentCaptain is not null && currentCaptain.UserId != member.UserId)
+                {
+                    currentCaptain.Role = "Member";
+                }
+
+                team.CaptainId = member.UserId;
+                member.Role = "Captain";
+            }
+            else
+            {
+                if (isCurrentCaptain)
+                {
+                    throw new InvalidOperationException(
+                        "El capitán no puede cambiarse a miembro. Transferí la capitanía a otro integrante primero.");
+                }
+
+                member.Role = "Member";
+            }
+
+            member.IsStarter = isStarter;
             return await _teamRepository.UpdateAsync(team, cancellationToken);
+        }
+
+        private static string NormalizeTeamRole(string? role)
+        {
+            var value = (role ?? string.Empty).Trim();
+            if (value.Equals("Captain", StringComparison.OrdinalIgnoreCase) ||
+                value.Equals("Capitán", StringComparison.OrdinalIgnoreCase) ||
+                value.Equals("Capitan", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Captain";
+            }
+
+            if (value.Equals("Member", StringComparison.OrdinalIgnoreCase) ||
+                value.Equals("Miembro", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Member";
+            }
+
+            throw new InvalidOperationException("Rol inválido. Los roles disponibles son Capitán y Miembro.");
         }
 
         // RF-11

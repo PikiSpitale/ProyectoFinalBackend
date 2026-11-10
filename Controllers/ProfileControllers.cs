@@ -5,6 +5,7 @@ using MongoDB.Bson;
 using ProyectAPI.DTOs;
 using ProyectAPI.Models;
 using ProyectAPI.Repositories;
+using ProyectAPI.Services;
 
 namespace ProyectAPI.Controllers;
 
@@ -15,11 +16,16 @@ public sealed class ProfileController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
     private readonly ITournamentRepository _tournamentRepository;
+    private readonly RankingService _rankingService;
 
-    public ProfileController(IUserRepository userRepository, ITournamentRepository tournamentRepository)
+    public ProfileController(
+        IUserRepository userRepository,
+        ITournamentRepository tournamentRepository,
+        RankingService rankingService)
     {
         _userRepository = userRepository;
         _tournamentRepository = tournamentRepository;
+        _rankingService = rankingService;
     }
 
     [HttpGet("me")]
@@ -234,6 +240,9 @@ public sealed class ProfileController : ControllerBase
         // RF-08: se limpian las inscripciones a torneos que todavía no comenzaron.
         await _tournamentRepository.RemoveParticipantFromUpcomingTournamentsAsync(
             gameToRemove.GameName, userId, cancellationToken);
+
+        // RF-08: el historial de ranking del juego deja de mostrarse para este jugador.
+        await _rankingService.RemoveUserGameAsync(userId, gameToRemove.GameName, cancellationToken);
 
         return Ok(new { message = "Videojuego eliminado exitosamente", games = user.Games });
     }

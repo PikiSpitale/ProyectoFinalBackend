@@ -59,7 +59,9 @@ builder.Services.AddScoped<ITeamInvitationRepository, TeamInvitationRepository>(
 builder.Services.AddScoped<TeamService>();
 
 // Registro de dependencias para el Módulo de Rankings
+builder.Services.AddScoped<IPointTransactionRepository, PointTransactionRepository>();
 builder.Services.AddScoped<RankingService>();
+builder.Services.AddHostedService<RankingBackfillService>();
 
 builder.Services.AddControllers();
 
