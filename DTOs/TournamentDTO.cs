@@ -29,12 +29,14 @@
         List<TournamentParticipantDto> Participants
     );
 
+    // El UserId se sobrescribe con el del token; los demás campos se completan
+    // desde el perfil del usuario. Se dejan opcionales para clientes mínimos.
     public record TournamentParticipantDto(
-        string UserId,
-        string Username,
-        string InGameName,
-        string Rank,
-        DateTime RegisteredAt,
+        string UserId = "",
+        string Username = "",
+        string InGameName = "",
+        string Rank = "",
+        DateTime RegisteredAt = default,
         bool IsDisqualified = false,
         string? DisqualificationReason = null,
         bool RankVerified = false,

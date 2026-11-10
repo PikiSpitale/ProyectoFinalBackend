@@ -2,10 +2,17 @@ using System.Text.RegularExpressions;
 
 namespace ProyectAPI.Services
 {
-    // Validación de filtros de rango para equipos públicos.
+    // Validación de filtros de rango para equipos públicos y condiciones de torneos.
     // Soporta: tiers con subdivisión (Valorant/LoL/RL), Premier numérico (CS2), divisiones Rivals (EA FC/FIFA).
     public static class GameRankLadders
     {
+        public enum RankConditionMode
+        {
+            None,
+            Minimum,
+            Fixed
+        }
+
         private static readonly string[] ValorantTiers = ["Hierro", "Bronce", "Plata", "Oro", "Platino", "Diamante", "Ascendente", "Inmortal", "Radiante"];
         private static readonly string[] LolTiers = ["Hierro", "Bronce", "Plata", "Oro", "Platino", "Esmeralda", "Diamante", "Maestro", "Gran Maestro", "Retador", "Aspirante", "Challenger"];
         private static readonly string[] RlTiers = ["Bronce", "Plata", "Oro", "Platino", "Diamante", "Campeón", "Champion", "Gran Campeón", "Grand Champion", "Supersónico", "Supersonic Legend", "SSL"];
@@ -38,6 +45,62 @@ namespace ProyectAPI.Services
             if (IsCsPremier(g)) return TryParsePremier(minRank, out var minP) && TryParsePremier(userRank, out var usrP) && usrP >= minP;
             if (IsFifa(g)) return TryParseFifaDivision(minRank, out var minF) && TryParseFifaDivision(userRank, out var usrF) && usrF >= minF; // mayor score = mejor (Div 1)
             return false;
+        }
+
+        // Condición canónica que arma la UI: "Sin restricción", "Mínimo: Oro 2" o "Fijo: Oro 2".
+        // Devuelve None cuando el texto es libre/ambiguo (se resuelve con verificación manual RF-22).
+        public static RankConditionMode ParseCondition(string gameName, string? conditions, out string? rank)
+        {
+            rank = null;
+            var cond = (conditions ?? string.Empty).Trim();
+            if (cond.Length == 0) return RankConditionMode.None;
+
+            var lower = cond.ToLowerInvariant();
+            if (IsUnrestricted(lower)) return RankConditionMode.None;
+
+            var fixedIntent = lower.StartsWith("fijo") || lower.StartsWith("exacto")
+                || lower.Contains("rango fijo") || lower.Contains("rango exacto");
+            var minIntent = lower.StartsWith("mínimo") || lower.StartsWith("minimo") || lower.StartsWith("min:")
+                || lower.Contains("mínimo") || lower.Contains("minimo") || lower.Contains("al menos")
+                || lower.Contains("desde") || lower.Contains("o más") || lower.Contains("o mas")
+                || lower.Contains("superior") || lower.Contains(">=") || cond.EndsWith("+");
+
+            var candidate = ExtractRankCandidate(cond);
+            if (!IsRecognizedRank(gameName, candidate)) return RankConditionMode.None;
+
+            rank = candidate;
+            if (fixedIntent && !minIntent) return RankConditionMode.Fixed;
+            if (minIntent) return RankConditionMode.Minimum;
+            return RankConditionMode.None;
+        }
+
+        // Formato estructurado generado por la UI. Si es estructurado, el rango debe existir.
+        public static bool IsStructuredCondition(string? conditions)
+        {
+            var lower = (conditions ?? string.Empty).Trim().ToLowerInvariant();
+            return lower.StartsWith("mínimo:") || lower.StartsWith("minimo:") || lower.StartsWith("min:")
+                || lower.StartsWith("fijo:") || lower.StartsWith("exacto:");
+        }
+
+        public static bool IsUnrestricted(string? conditions)
+        {
+            var lower = (conditions ?? string.Empty).Trim().ToLowerInvariant();
+            return lower.Length == 0
+                || lower is "-" or "n/a"
+                || lower.Contains("sin restric") || lower.Contains("libre") || lower.Contains("todos")
+                || lower.Contains("cualquiera") || lower.Contains("abierto") || lower.Contains("ningun");
+        }
+
+        private static string ExtractRankCandidate(string conditions)
+        {
+            var candidate = Regex.Replace(conditions, @"(?i)^(condici[oó]n(es)?\s*(de\s*rango)?\s*[:\-]\s*)", "");
+            candidate = Regex.Replace(
+                candidate,
+                @"(?i)\b(rango\s*m[ií]nimo|m[ií]nimo|minimum|min|rango\s*fijo|fijo|exacto|solo|rango|al\s*menos|desde|o\s*superior|o\s*m[aá]s)\b\s*[:\-]?",
+                "");
+            candidate = candidate.Replace(">=", "").Replace(">", "").Trim().TrimEnd('+').Trim();
+            candidate = Regex.Replace(candidate, @"(?i)\s*(o\s+superior|o\s+m[aá]s|en\s+adelante).*$", "").Trim();
+            return candidate;
         }
 
         public static bool MatchesFixed(string gameName, string fixedRank, string userRank)

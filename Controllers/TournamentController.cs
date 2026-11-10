@@ -25,9 +25,10 @@ namespace ProyectAPI.Controllers
             [FromQuery] string? status,
             [FromQuery] DateTime? fromDate,
             [FromQuery] DateTime? toDate,
+            [FromQuery] string? rank,
             CancellationToken cancellationToken)
         {
-            var tournaments = await _tournamentService.GetAllTournamentsAsync(gameName, status, fromDate, toDate, cancellationToken);
+            var tournaments = await _tournamentService.GetAllTournamentsAsync(gameName, status, fromDate, toDate, rank, cancellationToken);
             return Ok(tournaments);
         }
 

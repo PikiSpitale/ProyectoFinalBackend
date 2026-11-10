@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using ProyectAPI.Infrastructure;
 using ProyectAPI.Models;
 
@@ -113,13 +114,22 @@ namespace ProyectAPI.Repositories
                 Builders<Tournament>.Filter.ElemMatch(t => t.Participants, p => p.UserId == userId)
             );
 
-            // [-1] es el operador posicional de Mongo: el elemento que coincidió con el filtro
+            // $[p] con arrayFilters: actualiza únicamente el participante indicado.
+            // (El proveedor LINQ3 de MongoDB no admite el índice posicional [-1].)
             var update = Builders<Tournament>.Update.Combine(
-                Builders<Tournament>.Update.Set(t => t.Participants[-1].IsDisqualified, true),
-                Builders<Tournament>.Update.Set(t => t.Participants[-1].DisqualificationReason, reason)
+                Builders<Tournament>.Update.Set("Participants.$[p].IsDisqualified", true),
+                Builders<Tournament>.Update.Set("Participants.$[p].DisqualificationReason", reason)
             );
+            var options = new UpdateOptions
+            {
+                ArrayFilters = new List<ArrayFilterDefinition>
+                {
+                    new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                        new BsonDocument("p.UserId", userId))
+                }
+            };
 
-            var result = await _tournamentsCollection.UpdateOneAsync(filter, update, null, cancellationToken);
+            var result = await _tournamentsCollection.UpdateOneAsync(filter, update, options, cancellationToken);
             return result.ModifiedCount > 0;
         }
 
@@ -132,12 +142,20 @@ namespace ProyectAPI.Repositories
             );
 
             var update = Builders<Tournament>.Update.Combine(
-                Builders<Tournament>.Update.Set(t => t.Participants[-1].RankVerified, verified),
-                Builders<Tournament>.Update.Set(t => t.Participants[-1].RankVerifiedBy, verifiedBy),
-                Builders<Tournament>.Update.Set(t => t.Participants[-1].RankVerifiedAt, verified ? DateTime.UtcNow : null)
+                Builders<Tournament>.Update.Set("Participants.$[p].RankVerified", verified),
+                Builders<Tournament>.Update.Set("Participants.$[p].RankVerifiedBy", verifiedBy),
+                Builders<Tournament>.Update.Set("Participants.$[p].RankVerifiedAt", verified ? DateTime.UtcNow : (DateTime?)null)
             );
+            var options = new UpdateOptions
+            {
+                ArrayFilters = new List<ArrayFilterDefinition>
+                {
+                    new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                        new BsonDocument("p.UserId", userId))
+                }
+            };
 
-            var result = await _tournamentsCollection.UpdateOneAsync(filter, update, null, cancellationToken);
+            var result = await _tournamentsCollection.UpdateOneAsync(filter, update, options, cancellationToken);
             return result.ModifiedCount > 0;
         }
 

@@ -22,12 +22,20 @@ namespace ProyectAPI.Services
         }
 
         public async Task<List<TournamentResponse>> GetAllTournamentsAsync(CancellationToken cancellationToken) =>
-            await GetAllTournamentsAsync(null, null, null, null, cancellationToken);
+            await GetAllTournamentsAsync(null, null, null, null, null, cancellationToken);
+
+        public async Task<List<TournamentResponse>> GetAllTournamentsAsync(string? gameName, string? status, DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken) =>
+            await GetAllTournamentsAsync(gameName, status, fromDate, toDate, null, cancellationToken);
 
         // RF-19
-        public async Task<List<TournamentResponse>> GetAllTournamentsAsync(string? gameName, string? status, DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken)
+        public async Task<List<TournamentResponse>> GetAllTournamentsAsync(string? gameName, string? status, DateTime? fromDate, DateTime? toDate, string? rank, CancellationToken cancellationToken)
         {
             var tournaments = await _tournamentRepository.GetAllAsync(gameName, status, fromDate, toDate, cancellationToken);
+            if (!string.IsNullOrWhiteSpace(rank))
+            {
+                tournaments = tournaments.Where(t => MatchesRankFilter(t, rank.Trim())).ToList();
+            }
+
             return tournaments.Select(MapToResponse).ToList();
         }
 
@@ -39,27 +47,39 @@ namespace ProyectAPI.Services
 
         public async Task CreateTournamentAsync(CreateTournamentRequest request, CancellationToken cancellationToken)
         {
+            var title = (request.Title ?? string.Empty).Trim();
+            var gameName = (request.GameName ?? string.Empty).Trim();
+            if (title.Length < 3)
+                throw new InvalidOperationException("El título del torneo debe tener al menos 3 caracteres.");
+            if (string.IsNullOrWhiteSpace(gameName))
+                throw new InvalidOperationException("Debés indicar el videojuego del torneo.");
+            if (request.MaxParticipants < 2)
+                throw new InvalidOperationException("El cupo máximo debe ser de al menos 2 participantes.");
+            if (request.PrizePool < 0)
+                throw new InvalidOperationException("El premio no puede ser negativo.");
+            if (request.StartDate == default || request.EndDate == default)
+                throw new InvalidOperationException("Debés indicar la fecha y hora de inicio y de fin del torneo.");
             if (request.EndDate < request.StartDate)
-            {
                 throw new InvalidOperationException("La fecha de finalización no puede ser anterior a la fecha de inicio del torneo.");
-            }
 
             var type = string.IsNullOrWhiteSpace(request.TournamentType) ? "Individual" : request.TournamentType.Trim();
             if (type != "Individual" && type != "Equipo")
-            {
                 throw new InvalidOperationException("El tipo de torneo debe ser 'Individual' o 'Equipo'.");
-            }
+
+            var rankConditions = (request.RankConditions ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(rankConditions)) rankConditions = "Sin restricción";
+            ValidateRankConditions(gameName, rankConditions);
 
             var tournament = new Tournament
             {
-                Title = request.Title,
-                GameName = request.GameName,
-                BannerUrl = request.BannerUrl,
+                Title = title,
+                GameName = gameName,
+                BannerUrl = request.BannerUrl ?? string.Empty,
                 PrizePool = request.PrizePool,
                 MaxParticipants = request.MaxParticipants,
                 TournamentType = type,
-                Rules = request.Rules,
-                RankConditions = request.RankConditions,
+                Rules = request.Rules ?? string.Empty,
+                RankConditions = rankConditions,
                 StartDate = request.StartDate.ToUniversalTime(),
                 EndDate = request.EndDate.ToUniversalTime(),
                 Participants = new List<TournamentParticipant>()
@@ -79,15 +99,38 @@ namespace ProyectAPI.Services
                 throw new InvalidOperationException("Solo se pueden modificar torneos que aún no han comenzado.");
             }
 
-            if (!string.IsNullOrWhiteSpace(request.Title)) tournament.Title = request.Title.Trim();
-            if (!string.IsNullOrWhiteSpace(request.GameName)) tournament.GameName = request.GameName.Trim();
+            var newTitle = string.IsNullOrWhiteSpace(request.Title) ? tournament.Title : request.Title.Trim();
+            var newGame = string.IsNullOrWhiteSpace(request.GameName) ? tournament.GameName : request.GameName.Trim();
+            var newRankConditions = request.RankConditions is null
+                ? tournament.RankConditions
+                : request.RankConditions.Trim();
+
+            if (newTitle.Length < 3)
+                throw new InvalidOperationException("El título del torneo debe tener al menos 3 caracteres.");
+            if (string.IsNullOrWhiteSpace(newGame))
+                throw new InvalidOperationException("Debés indicar el videojuego del torneo.");
+            if (string.IsNullOrWhiteSpace(newRankConditions)) newRankConditions = "Sin restricción";
+
+            if (!string.Equals(newGame, tournament.GameName, StringComparison.OrdinalIgnoreCase) && tournament.Participants.Count > 0)
+                throw new InvalidOperationException("No se puede cambiar el videojuego cuando ya hay inscriptos.");
+            ValidateRankConditions(newGame, newRankConditions);
+
+            tournament.Title = newTitle;
+            tournament.GameName = newGame;
             if (request.BannerUrl is not null) tournament.BannerUrl = request.BannerUrl;
-            if (request.PrizePool.HasValue) tournament.PrizePool = request.PrizePool.Value;
+            if (request.PrizePool.HasValue)
+            {
+                if (request.PrizePool.Value < 0)
+                    throw new InvalidOperationException("El premio no puede ser negativo.");
+                tournament.PrizePool = request.PrizePool.Value;
+            }
             if (request.Rules is not null) tournament.Rules = request.Rules;
-            if (request.RankConditions is not null) tournament.RankConditions = request.RankConditions;
+            tournament.RankConditions = newRankConditions;
 
             if (request.MaxParticipants.HasValue)
             {
+                if (request.MaxParticipants.Value < 2)
+                    throw new InvalidOperationException("El cupo máximo debe ser de al menos 2 participantes.");
                 if (request.MaxParticipants.Value < tournament.Participants.Count)
                     throw new InvalidOperationException("El cupo máximo no puede ser menor a la cantidad de inscritos.");
                 tournament.MaxParticipants = request.MaxParticipants.Value;
@@ -699,40 +742,50 @@ namespace ProyectAPI.Services
         private static void ValidateRankCondition(Tournament tournament, string userRank, string who)
         {
             var cond = (tournament.RankConditions ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(cond)) return;
-
-            var lower = cond.ToLowerInvariant();
-            if (lower is "-" or "n/a" || lower.Contains("libre") || lower.Contains("todos") || lower.Contains("sin restric") || lower.Contains("cualquiera") || lower.Contains("abierto") || lower.Contains("ningun"))
-                return;
-
+            if (GameRankLadders.IsUnrestricted(cond)) return;
             if (!GameRankLadders.HasLadder(tournament.GameName)) return;
             if (string.IsNullOrWhiteSpace(userRank)) return;
 
-            var minIntent = lower.Contains("mínimo") || lower.Contains("minimo") || lower.Contains("minimum") || lower.Contains("al menos") || lower.Contains("desde") || lower.Contains("superior") || lower.Contains(" o mas") || lower.Contains(" o más") || lower.Contains(">=") || cond.TrimEnd().EndsWith("+");
-            var fixedIntent = lower.Contains("fijo") || lower.Contains("exacto") || lower.Contains("únicamente igual") || lower.Contains("unicamente igual");
+            var mode = GameRankLadders.ParseCondition(tournament.GameName, cond, out var requiredRank);
+            if (mode == GameRankLadders.RankConditionMode.None || string.IsNullOrWhiteSpace(requiredRank)) return;
 
-            // Extraer rango candidato quitando prefijos comunes
-            var candidate = cond;
-            candidate = System.Text.RegularExpressions.Regex.Replace(candidate, @"(?i)^(condici[oó]n(es)?\s*(de\s*rango)?\s*[:\-]\s*)", "");
-            candidate = System.Text.RegularExpressions.Regex.Replace(candidate, @"(?i)\b(rango\s*m[ií]nimo|m[ií]nimo|minimum|min|rango\s*fijo|fijo|exacto|solo|rango|al\s*menos|desde)\b\s*[:\-]?", "");
-            candidate = candidate.Replace(">=", "").Replace(">", "").Trim().TrimEnd('+').Trim();
-            // Quitar sufijos tipo "o superior"
-            candidate = System.Text.RegularExpressions.Regex.Replace(candidate, @"(?i)\s*(o\s+superior|o\s+m[aá]s|en\s+adelante).*$", "").Trim();
-
-            if (!GameRankLadders.IsRecognizedRank(tournament.GameName, candidate)) return;
-
-            if (fixedIntent && !minIntent)
+            if (mode == GameRankLadders.RankConditionMode.Fixed)
             {
-                if (!GameRankLadders.MatchesFixed(tournament.GameName, candidate, userRank))
-                    throw new InvalidOperationException($"No cumple la condición de rango del torneo ({cond}). Se requiere exactamente {candidate} para {who}.");
+                if (!GameRankLadders.MatchesFixed(tournament.GameName, requiredRank, userRank))
+                    throw new InvalidOperationException($"No cumple la condición de rango del torneo ({cond}). Se requiere exactamente {requiredRank} para {who} (rango actual: {userRank}).");
                 return;
             }
 
-            if (minIntent)
-            {
-                if (!GameRankLadders.MeetsMinimum(tournament.GameName, candidate, userRank))
-                    throw new InvalidOperationException($"No cumple la condición de rango del torneo ({cond}). Se requiere al menos {candidate} para {who} (rango actual: {userRank}).");
-            }
+            if (!GameRankLadders.MeetsMinimum(tournament.GameName, requiredRank, userRank))
+                throw new InvalidOperationException($"No cumple la condición de rango del torneo ({cond}). Se requiere al menos {requiredRank} para {who} (rango actual: {userRank}).");
+        }
+
+        // Valida que una condición estructurada ("Mínimo: X" / "Fijo: X") use un rango reconocido.
+        private static void ValidateRankConditions(string gameName, string? rankConditions)
+        {
+            if (!GameRankLadders.IsStructuredCondition(rankConditions)) return;
+
+            var mode = GameRankLadders.ParseCondition(gameName, rankConditions, out var requiredRank);
+            if (!GameRankLadders.HasLadder(gameName))
+                throw new InvalidOperationException($"El juego '{gameName}' no tiene una escalera de rangos configurada. Usá 'Sin restricción' y verificá el rango manualmente (RF-22).");
+            if (mode == GameRankLadders.RankConditionMode.None || string.IsNullOrWhiteSpace(requiredRank))
+                throw new InvalidOperationException("La condición de rango no es válida. Elegí un rango reconocido para el videojuego del torneo.");
+        }
+
+        // RF-19: un torneo es compatible con el rango consultado si no tiene restricción
+        // o si el rango cumple el mínimo/fijo. Condiciones libres se incluyen (no se pueden evaluar).
+        private static bool MatchesRankFilter(Tournament tournament, string rank)
+        {
+            var cond = (tournament.RankConditions ?? string.Empty).Trim();
+            if (GameRankLadders.IsUnrestricted(cond)) return true;
+
+            var mode = GameRankLadders.ParseCondition(tournament.GameName, cond, out var requiredRank);
+            if (mode == GameRankLadders.RankConditionMode.None || string.IsNullOrWhiteSpace(requiredRank)) return true;
+            if (!GameRankLadders.IsRecognizedRank(tournament.GameName, rank)) return true;
+
+            return mode == GameRankLadders.RankConditionMode.Fixed
+                ? GameRankLadders.MatchesFixed(tournament.GameName, requiredRank, rank)
+                : GameRankLadders.MeetsMinimum(tournament.GameName, requiredRank, rank);
         }
 
         // ----- Mapeos -----
