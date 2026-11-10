@@ -188,5 +188,60 @@ namespace ProyectAPI.Repositories
             var result = await _tournamentsCollection.UpdateManyAsync(filter, update, null, cancellationToken);
             return result.ModifiedCount;
         }
+
+        // Un equipo no puede cambiar su plantilla mientras tenga un torneo en curso:
+        // los puntos se calculan con la plantilla congelada al inscribirse.
+        public async Task<bool> HasInProgressTournamentWithTeamAsync(string teamId, CancellationToken cancellationToken)
+        {
+            var filter = Builders<Tournament>.Filter.And(
+                Builders<Tournament>.Filter.Eq(t => t.Status, TournamentStatuses.InProgress),
+                Builders<Tournament>.Filter.ElemMatch(t => t.Participants, p => p.TeamId == teamId)
+            );
+
+            return await _tournamentsCollection.Find(filter).AnyAsync(cancellationToken);
+        }
+
+        // Al eliminar un equipo se retiran sus inscripciones a torneos que todavía no comenzaron.
+        public async Task<long> RemoveTeamFromUpcomingTournamentsAsync(string teamId, CancellationToken cancellationToken)
+        {
+            var filter = Builders<Tournament>.Filter.And(
+                Builders<Tournament>.Filter.Eq(t => t.Status, TournamentStatuses.Upcoming),
+                Builders<Tournament>.Filter.ElemMatch(t => t.Participants, p => p.TeamId == teamId)
+            );
+
+            var update = Builders<Tournament>.Update.PullFilter(
+                t => t.Participants,
+                p => p.TeamId == teamId
+            );
+
+            var result = await _tournamentsCollection.UpdateManyAsync(filter, update, null, cancellationToken);
+            return result.ModifiedCount;
+        }
+
+        // Si el equipo cambia su plantilla antes de que empiece el torneo, la
+        // inscripción "Próximo" se actualiza para no quedar con datos viejos.
+        public async Task<long> SyncTeamRosterInUpcomingTournamentsAsync(string teamId, string teamName, List<TournamentRosterMember> roster, CancellationToken cancellationToken)
+        {
+            var filter = Builders<Tournament>.Filter.And(
+                Builders<Tournament>.Filter.Eq(t => t.Status, TournamentStatuses.Upcoming),
+                Builders<Tournament>.Filter.ElemMatch(t => t.Participants, p => p.TeamId == teamId)
+            );
+
+            var update = Builders<Tournament>.Update.Combine(
+                Builders<Tournament>.Update.Set("Participants.$[p].Roster", roster),
+                Builders<Tournament>.Update.Set("Participants.$[p].TeamName", teamName)
+            );
+            var options = new UpdateOptions
+            {
+                ArrayFilters = new List<ArrayFilterDefinition>
+                {
+                    new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                        new BsonDocument("p.TeamId", teamId))
+                }
+            };
+
+            var result = await _tournamentsCollection.UpdateManyAsync(filter, update, options, cancellationToken);
+            return result.ModifiedCount;
+        }
     }
 }

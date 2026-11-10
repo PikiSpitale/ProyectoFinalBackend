@@ -5,9 +5,9 @@ namespace ProyectAPI.Services
     public interface ITournamentService
     {
         Task<List<TournamentResponse>> GetAllTournamentsAsync(CancellationToken cancellationToken);
-        Task<List<TournamentResponse>> GetAllTournamentsAsync(string? gameName, string? status, DateTime? fromDate, DateTime? toDate, string? rank, CancellationToken cancellationToken);
-        Task<TournamentResponse?> GetTournamentByIdAsync(string id, CancellationToken cancellationToken);
-        Task CreateTournamentAsync(CreateTournamentRequest request, CancellationToken cancellationToken);
+        Task<List<TournamentResponse>> GetAllTournamentsAsync(string? gameName, string? status, DateTime? fromDate, DateTime? toDate, string? rank, bool includeCreator, CancellationToken cancellationToken);
+        Task<TournamentResponse?> GetTournamentByIdAsync(string id, bool includeCreator, CancellationToken cancellationToken);
+        Task CreateTournamentAsync(CreateTournamentRequest request, string creatorId, CancellationToken cancellationToken);
         Task<TournamentResponse?> UpdateTournamentAsync(string id, UpdateTournamentRequest request, CancellationToken cancellationToken);
         Task<bool> CancelTournamentAsync(string id, CancellationToken cancellationToken);
         Task<bool> VerifyParticipantRankAsync(string tournamentId, string userId, bool verified, string? verifiedBy, CancellationToken cancellationToken);

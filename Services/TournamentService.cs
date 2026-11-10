@@ -8,6 +8,13 @@ namespace ProyectAPI.Services
     {
         private const int MinParticipantsForBracket = 2;
 
+        // La inscripción abre 30 minutos antes del inicio y se cierra puntualmente
+        // en la fecha de inicio. Por eso un torneo nuevo debe crearse con al menos
+        // 30 minutos de anticipación.
+        private static readonly TimeSpan RegistrationWindow = TimeSpan.FromMinutes(30);
+        private const int MaxStarters = 11;
+        private const int MaxSubstitutes = 11;
+
         private readonly ITournamentRepository _tournamentRepository;
         private readonly IMatchRepository _matchRepository;
         private readonly ITeamRepository _teamRepository;
@@ -32,13 +39,13 @@ namespace ProyectAPI.Services
         }
 
         public async Task<List<TournamentResponse>> GetAllTournamentsAsync(CancellationToken cancellationToken) =>
-            await GetAllTournamentsAsync(null, null, null, null, null, cancellationToken);
+            await GetAllTournamentsAsync(null, null, null, null, null, false, cancellationToken);
 
         public async Task<List<TournamentResponse>> GetAllTournamentsAsync(string? gameName, string? status, DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken) =>
-            await GetAllTournamentsAsync(gameName, status, fromDate, toDate, null, cancellationToken);
+            await GetAllTournamentsAsync(gameName, status, fromDate, toDate, null, false, cancellationToken);
 
         // RF-19
-        public async Task<List<TournamentResponse>> GetAllTournamentsAsync(string? gameName, string? status, DateTime? fromDate, DateTime? toDate, string? rank, CancellationToken cancellationToken)
+        public async Task<List<TournamentResponse>> GetAllTournamentsAsync(string? gameName, string? status, DateTime? fromDate, DateTime? toDate, string? rank, bool includeCreator, CancellationToken cancellationToken)
         {
             var tournaments = await _tournamentRepository.GetAllAsync(gameName, status, fromDate, toDate, cancellationToken);
             if (!string.IsNullOrWhiteSpace(rank))
@@ -46,16 +53,16 @@ namespace ProyectAPI.Services
                 tournaments = tournaments.Where(t => MatchesRankFilter(t, rank.Trim())).ToList();
             }
 
-            return tournaments.Select(MapToResponse).ToList();
+            return tournaments.Select(t => MapToResponse(t, includeCreator)).ToList();
         }
 
-        public async Task<TournamentResponse?> GetTournamentByIdAsync(string id, CancellationToken cancellationToken)
+        public async Task<TournamentResponse?> GetTournamentByIdAsync(string id, bool includeCreator, CancellationToken cancellationToken)
         {
             var tournament = await _tournamentRepository.GetByIdAsync(id, cancellationToken);
-            return tournament is null ? null : MapToResponse(tournament);
+            return tournament is null ? null : MapToResponse(tournament, includeCreator);
         }
 
-        public async Task CreateTournamentAsync(CreateTournamentRequest request, CancellationToken cancellationToken)
+        public async Task CreateTournamentAsync(CreateTournamentRequest request, string creatorId, CancellationToken cancellationToken)
         {
             var title = (request.Title ?? string.Empty).Trim();
             var gameName = (request.GameName ?? string.Empty).Trim();
@@ -69,16 +76,25 @@ namespace ProyectAPI.Services
                 throw new InvalidOperationException("El premio no puede ser negativo.");
             if (request.StartDate == default || request.EndDate == default)
                 throw new InvalidOperationException("Debés indicar la fecha y hora de inicio y de fin del torneo.");
-            if (request.EndDate < request.StartDate)
+
+            var startDate = request.StartDate.ToUniversalTime();
+            var endDate = request.EndDate.ToUniversalTime();
+            if (endDate < startDate)
                 throw new InvalidOperationException("La fecha de finalización no puede ser anterior a la fecha de inicio del torneo.");
+
+            EnsureStartDateIsInTheFuture(startDate);
 
             var type = string.IsNullOrWhiteSpace(request.TournamentType) ? "Individual" : request.TournamentType.Trim();
             if (type != "Individual" && type != "Equipo")
                 throw new InvalidOperationException("El tipo de torneo debe ser 'Individual' o 'Equipo'.");
 
+            var (starters, substitutes) = ResolveTeamFormat(gameName, type, request.StartersCount, request.SubstitutesCount);
+
             var rankConditions = (request.RankConditions ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(rankConditions)) rankConditions = "Sin restricción";
             ValidateRankConditions(gameName, rankConditions);
+
+            var creator = await _userRepository.GetByIdAsync(creatorId, cancellationToken);
 
             var tournament = new Tournament
             {
@@ -88,10 +104,14 @@ namespace ProyectAPI.Services
                 PrizePool = request.PrizePool,
                 MaxParticipants = request.MaxParticipants,
                 TournamentType = type,
+                StartersCount = starters,
+                SubstitutesCount = substitutes,
                 Rules = request.Rules ?? string.Empty,
                 RankConditions = rankConditions,
-                StartDate = request.StartDate.ToUniversalTime(),
-                EndDate = request.EndDate.ToUniversalTime(),
+                CreatedByUserId = creatorId ?? string.Empty,
+                CreatedByUsername = creator?.Username ?? string.Empty,
+                StartDate = startDate,
+                EndDate = endDate,
                 Participants = new List<TournamentParticipant>()
             };
 
@@ -156,15 +176,53 @@ namespace ProyectAPI.Services
                 tournament.TournamentType = type;
             }
 
+            if (string.Equals(tournament.TournamentType, "Equipo", StringComparison.OrdinalIgnoreCase))
+            {
+                var currentStarters = tournament.StartersCount > 0
+                    ? tournament.StartersCount
+                    : GetDefaultTeamFormat(tournament.GameName).Starters;
+                var currentSubstitutes = tournament.StartersCount > 0
+                    ? tournament.SubstitutesCount
+                    : GetDefaultTeamFormat(tournament.GameName).Substitutes;
+
+                var (starters, substitutes) = ResolveTeamFormat(
+                    tournament.GameName,
+                    tournament.TournamentType,
+                    request.StartersCount ?? currentStarters,
+                    request.SubstitutesCount ?? currentSubstitutes);
+
+                if (tournament.Participants.Count > 0 &&
+                    (starters != currentStarters || substitutes != currentSubstitutes))
+                {
+                    throw new InvalidOperationException("No se puede cambiar el formato de equipo cuando ya hay inscritos.");
+                }
+
+                tournament.StartersCount = starters;
+                tournament.SubstitutesCount = substitutes;
+            }
+            else if (tournament.StartersCount <= 0)
+            {
+                // Torneos viejos sin formato guardado: se completa con el default del juego.
+                var (starters, substitutes) = ResolveTeamFormat(
+                    tournament.GameName, tournament.TournamentType, null, null);
+                tournament.StartersCount = starters;
+                tournament.SubstitutesCount = substitutes;
+            }
+
             var newStart = request.StartDate?.ToUniversalTime() ?? tournament.StartDate;
             var newEnd = request.EndDate?.ToUniversalTime() ?? tournament.EndDate;
             if (newEnd < newStart)
                 throw new InvalidOperationException("La fecha de finalización no puede ser anterior a la fecha de inicio del torneo.");
+            if (request.StartDate.HasValue &&
+                Math.Abs((newStart - tournament.StartDate).TotalSeconds) >= 1)
+            {
+                EnsureStartDateIsInTheFuture(newStart);
+            }
             tournament.StartDate = newStart;
             tournament.EndDate = newEnd;
 
             await _tournamentRepository.UpdateAsync(tournament, cancellationToken);
-            return MapToResponse(tournament);
+            return MapToResponse(tournament, includeCreator: true);
         }
 
         // RF-18
@@ -212,6 +270,8 @@ namespace ProyectAPI.Services
             if (DateTime.UtcNow < opensAt)
                 throw new InvalidOperationException($"La inscripción se habilita 30 minutos antes del inicio ({opensAt.ToLocalTime():g}).");
 
+            EnsureRegistrationIsOpen(tournament);
+
             if (tournament.TournamentType == "Equipo")
                 throw new InvalidOperationException("Para inscribirse a un torneo por equipos, debés usar el endpoint de inscripción por equipo.");
 
@@ -229,7 +289,7 @@ namespace ProyectAPI.Services
             var participant = new TournamentParticipant
             {
                 UserId = participantDto.UserId,
-                Username = string.IsNullOrWhiteSpace(participantDto.Username) ? user.Username : participantDto.Username,
+                Username = string.IsNullOrWhiteSpace(participantDto.Username) ? (user.Username ?? "Jugador") : participantDto.Username,
                 InGameName = userGame.InGameName,
                 Rank = userGame.Rank,
                 RegisteredAt = DateTime.UtcNow
@@ -256,6 +316,8 @@ namespace ProyectAPI.Services
             if (DateTime.UtcNow < opensAt)
                 throw new InvalidOperationException($"La inscripción se habilita 30 minutos antes del inicio ({opensAt.ToLocalTime():g}).");
 
+            EnsureRegistrationIsOpen(tournament);
+
             if (tournament.TournamentType != "Equipo")
                 throw new InvalidOperationException("Este torneo es individual.");
 
@@ -270,8 +332,18 @@ namespace ProyectAPI.Services
 
             var starters = team.Members.Where(m => m.IsStarter).ToList();
             var substitutes = team.Members.Where(m => !m.IsStarter).ToList();
-            if (starters.Count != 5 || substitutes.Count != 2)
-                throw new InvalidOperationException("El equipo debe tener exactamente 5 titulares y 2 suplentes para inscribirse a torneos grupales.");
+            var (requiredStarters, allowedSubstitutes) = ResolveTeamFormat(
+                tournament.GameName,
+                tournament.TournamentType,
+                tournament.StartersCount > 0 ? tournament.StartersCount : null,
+                tournament.StartersCount > 0 ? tournament.SubstitutesCount : null);
+
+            if (starters.Count != requiredStarters)
+                throw new InvalidOperationException(
+                    $"El equipo debe presentar exactamente {requiredStarters} titular(es) para este torneo (tiene {starters.Count}).");
+            if (substitutes.Count > allowedSubstitutes)
+                throw new InvalidOperationException(
+                    $"El equipo admite hasta {allowedSubstitutes} suplente(s) para este torneo (tiene {substitutes.Count}).");
 
             foreach (var member in team.Members)
             {
@@ -288,6 +360,13 @@ namespace ProyectAPI.Services
             var captainUser = captain is null ? null : await _userRepository.GetByIdAsync(captain.UserId, cancellationToken);
             var captainGame = captainUser?.Games?.FirstOrDefault(g => g.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase));
 
+            // Plantilla congelada: los puntos del torneo se acreditan a estos
+            // integrantes aunque después el equipo cambie o se elimine.
+            var roster = team.Members
+                .Where(m => !string.IsNullOrWhiteSpace(m.UserId))
+                .Select(m => new TournamentRosterMember { UserId = m.UserId, Username = m.Username })
+                .ToList();
+
             var participant = new TournamentParticipant
             {
                 UserId = team.CaptainId,
@@ -296,7 +375,8 @@ namespace ProyectAPI.Services
                 Rank = captainGame?.Rank ?? string.Empty,
                 RegisteredAt = DateTime.UtcNow,
                 TeamId = team.Id,
-                TeamName = team.Name
+                TeamName = team.Name,
+                Roster = roster
             };
 
             var added = await _tournamentRepository.AddParticipantAsync(tournamentId, participant, cancellationToken);
@@ -718,6 +798,85 @@ namespace ProyectAPI.Services
         private static HashSet<string> GetDisqualifiedIds(Tournament tournament) =>
             tournament.Participants.Where(p => p.IsDisqualified).Select(p => p.UserId).ToHashSet();
 
+        // Un torneo no puede crearse (ni reprogramarse) con menos de 30 minutos de
+        // anticipación: ese es el tiempo mínimo para que los equipos se inscriban.
+        private static void EnsureStartDateIsInTheFuture(DateTime startDateUtc)
+        {
+            var minimum = DateTime.UtcNow.Add(RegistrationWindow);
+            // Pequeña tolerancia para diferencias de reloj/red sin perder la ventana.
+            if (startDateUtc < minimum.AddSeconds(-30))
+            {
+                throw new InvalidOperationException(
+                    $"La fecha de inicio debe ser al menos 30 minutos posterior a la hora actual para permitir la inscripción (mínimo: {minimum.ToLocalTime():g}).");
+            }
+        }
+
+        // La inscripción se cierra exactamente en la fecha de inicio, sin esperar
+        // a que el scheduler genere las llaves.
+        private static void EnsureRegistrationIsOpen(Tournament tournament)
+        {
+            if (DateTime.UtcNow >= tournament.StartDate.ToUniversalTime())
+            {
+                throw new InvalidOperationException("La inscripción se cerró: el torneo ya llegó a su fecha de inicio.");
+            }
+        }
+
+        private static (int Starters, int Substitutes) ResolveTeamFormat(
+            string gameName,
+            string tournamentType,
+            int? starters,
+            int? substitutes)
+        {
+            if (starters.HasValue && starters.Value < 1)
+                throw new InvalidOperationException("La cantidad de titulares debe ser al menos 1.");
+            if (substitutes.HasValue && substitutes.Value < 0)
+                throw new InvalidOperationException("La cantidad de suplentes no puede ser negativa.");
+
+            var (defaultStarters, defaultSubstitutes) = GetDefaultTeamFormat(gameName);
+            var valueStarters = starters.HasValue && starters.Value > 0 ? starters.Value : defaultStarters;
+            var valueSubstitutes = substitutes ?? defaultSubstitutes;
+
+            if (valueStarters > MaxStarters)
+                throw new InvalidOperationException($"La cantidad de titulares no puede superar {MaxStarters}.");
+            if (valueSubstitutes > MaxSubstitutes)
+                throw new InvalidOperationException($"La cantidad de suplentes no puede superar {MaxSubstitutes}.");
+
+            // Los formatos por juego tienen límites propios (solo aplican a torneos de equipo).
+            if (string.Equals(tournamentType, "Equipo", StringComparison.OrdinalIgnoreCase))
+            {
+                var game = NormalizeGameName(gameName);
+                if (game.Contains("rocket", StringComparison.Ordinal) && valueStarters > 3)
+                    throw new InvalidOperationException("Rocket League admite como máximo 3 titulares (modos 1v1, 2v2 y 3v3).");
+                if (IsFivePlayerGame(game) && valueStarters != 5)
+                    throw new InvalidOperationException($"{gameName} requiere exactamente 5 titulares.");
+            }
+
+            return (valueStarters, valueSubstitutes);
+        }
+
+        // Formato por defecto según el juego (los torneos viejos no lo tienen guardado).
+        private static (int Starters, int Substitutes) GetDefaultTeamFormat(string gameName)
+        {
+            var game = NormalizeGameName(gameName);
+            if (game.Contains("rocket", StringComparison.Ordinal)) return (3, 0);
+            if (game.Contains("fifa", StringComparison.Ordinal) ||
+                game.Contains("ea fc", StringComparison.Ordinal) ||
+                game.Contains("fc 2", StringComparison.Ordinal)) return (11, 7);
+            return (5, 2);
+        }
+
+        private static bool IsFivePlayerGame(string game) =>
+            !game.Contains("rocket", StringComparison.Ordinal) &&
+            (game.Contains("valorant", StringComparison.Ordinal) ||
+             game.Contains("counter", StringComparison.Ordinal) ||
+             game.Contains("cs2", StringComparison.Ordinal) ||
+             game.Contains("cs:go", StringComparison.Ordinal) ||
+             game.Contains("csgo", StringComparison.Ordinal) ||
+             game.Contains("league", StringComparison.Ordinal) ||
+             game.Contains("lol", StringComparison.Ordinal));
+
+        private static string NormalizeGameName(string? gameName) => (gameName ?? string.Empty).Trim().ToLowerInvariant();
+
         // El ranking no debe romper la operación del torneo: si falla, se registra
         // el error y se deja el torneo consistente para el próximo recálculo.
         private async Task RebuildRankingAsync(string tournamentId, CancellationToken cancellationToken)
@@ -745,8 +904,8 @@ namespace ProyectAPI.Services
                 throw new InvalidOperationException("Se necesitan al menos 2 inscritos para generar las llaves.");
             }
 
-            // Ventana de inscripción: habilitar 30 minutos antes del inicio. Generación tras cierre (documentación).
-            // Si aún no pasó la ventana, no forzamos, pero permitimos que moderador genere manualmente si corresponde.
+            // El inicio manual de un moderador puede adelantarse a la fecha
+            // programada; el cierre de la inscripción se valida al inscribir.
 
             // Pasa de "Próximo" a "En curso" solo una vez: si dos procesos intentan a la vez, uno falla
             var reserved = await _tournamentRepository.TryChangeStatusAsync(
@@ -828,8 +987,12 @@ namespace ProyectAPI.Services
 
         // ----- Mapeos -----
 
-        private static TournamentResponse MapToResponse(Tournament t)
+        private static TournamentResponse MapToResponse(Tournament t, bool includeCreator = false)
         {
+            var (defaultStarters, defaultSubstitutes) = GetDefaultTeamFormat(t.GameName);
+            var starters = t.StartersCount > 0 ? t.StartersCount : defaultStarters;
+            var substitutes = t.StartersCount > 0 ? t.SubstitutesCount : defaultSubstitutes;
+
             return new TournamentResponse(
                 t.Id,
                 t.Title,
@@ -857,7 +1020,10 @@ namespace ProyectAPI.Services
                         p.RankVerifiedAt,
                         p.TeamId,
                         p.TeamName))
-                    .ToList()
+                    .ToList(),
+                starters,
+                substitutes,
+                includeCreator && !string.IsNullOrWhiteSpace(t.CreatedByUsername) ? t.CreatedByUsername : null
             );
         }
 

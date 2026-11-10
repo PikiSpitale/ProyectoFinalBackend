@@ -1,10 +1,10 @@
 ﻿namespace ProyectAPI.Services
 {
-    // Revisa cada minuto si hay torneos que ya llegaron a su fecha de inicio
+    // Revisa cada 15 segundos si hay torneos que ya llegaron a su fecha de inicio
     // y genera sus llaves automáticamente.
     public sealed class BracketSchedulerService : BackgroundService
     {
-        private static readonly TimeSpan CheckInterval = TimeSpan.FromMinutes(1);
+        private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(15);
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<BracketSchedulerService> _logger;

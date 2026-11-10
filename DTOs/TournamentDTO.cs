@@ -10,7 +10,9 @@
         string RankConditions,
         DateTime StartDate,
         DateTime EndDate,
-        string TournamentType = "Individual"
+        string TournamentType = "Individual",
+        int? StartersCount = null,
+        int? SubstitutesCount = null
     );
 
     public record TournamentResponse(
@@ -26,7 +28,10 @@
         string RankConditions,
         DateTime StartDate,
         DateTime EndDate,
-        List<TournamentParticipantDto> Participants
+        List<TournamentParticipantDto> Participants,
+        int StartersCount = 0,
+        int SubstitutesCount = 0,
+        string? CreatedByUsername = null
     );
 
     // El UserId se sobrescribe con el del token; los demás campos se completan
@@ -65,7 +70,9 @@
         string? RankConditions,
         DateTime? StartDate,
         DateTime? EndDate,
-        string? TournamentType
+        string? TournamentType,
+        int? StartersCount = null,
+        int? SubstitutesCount = null
     );
 
     // RF-22: verificación manual de rango

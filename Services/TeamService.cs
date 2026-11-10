@@ -9,17 +9,20 @@ namespace ProyectAPI.Services
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
         private readonly ITeamInvitationRepository _invitationRepository;
+        private readonly ITournamentRepository _tournamentRepository;
         private readonly RankingService _rankingService;
 
         public TeamService(
             ITeamRepository teamRepository,
             IUserRepository userRepository,
             ITeamInvitationRepository invitationRepository,
+            ITournamentRepository tournamentRepository,
             RankingService rankingService)
         {
             _teamRepository = teamRepository;
             _userRepository = userRepository;
             _invitationRepository = invitationRepository;
+            _tournamentRepository = tournamentRepository;
             _rankingService = rankingService;
         }
 
@@ -149,7 +152,14 @@ namespace ProyectAPI.Services
                 LastActive = DateTime.UtcNow
             };
 
-            return await _teamRepository.AddMemberAsync(teamId, newMember, cancellationToken);
+            var added = await _teamRepository.AddMemberAsync(teamId, newMember, cancellationToken);
+            if (added)
+            {
+                team.Members.Add(newMember);
+                await SyncUpcomingRosterAsync(team, cancellationToken);
+            }
+
+            return added;
         }
 
         public async Task<bool> LeaveTeamAsync(string teamId, string userId, CancellationToken cancellationToken)
@@ -160,12 +170,21 @@ namespace ProyectAPI.Services
             var memberToRemove = team.Members.FirstOrDefault(m => m.UserId == userId);
             if (memberToRemove == null) return false;
 
+            await EnsureRosterChangesAllowedAsync(teamId, cancellationToken);
+
             if (team.CaptainId == userId)
             {
                 var remaining = team.Members.Where(m => m.UserId != userId).ToList();
                 if (remaining.Count == 0)
                 {
-                    return await _teamRepository.DeleteAsync(teamId, cancellationToken);
+                    var deleted = await _teamRepository.DeleteAsync(teamId, cancellationToken);
+                    if (deleted)
+                    {
+                        await _tournamentRepository.RemoveTeamFromUpcomingTournamentsAsync(teamId, cancellationToken);
+                        await _rankingService.RemoveTeamAsync(teamId, cancellationToken);
+                    }
+
+                    return deleted;
                 }
 
                 var newCaptain = remaining.OrderBy(m => m.JoinedAt).First();
@@ -175,7 +194,9 @@ namespace ProyectAPI.Services
             }
 
             team.Members.Remove(memberToRemove);
-            return await _teamRepository.UpdateAsync(team, cancellationToken);
+            var updated = await _teamRepository.UpdateAsync(team, cancellationToken);
+            if (updated) await SyncUpcomingRosterAsync(team, cancellationToken);
+            return updated;
         }
 
         public async Task<bool> DeleteTeamAsync(string teamId, string currentUserId, bool isModerator, CancellationToken cancellationToken)
@@ -188,9 +209,14 @@ namespace ProyectAPI.Services
                 throw new UnauthorizedAccessException("Solo el capitán o un moderador pueden eliminar el equipo.");
             }
 
+            await EnsureRosterChangesAllowedAsync(teamId, cancellationToken);
+
             var deleted = await _teamRepository.DeleteAsync(teamId, cancellationToken);
             if (deleted)
             {
+                // Las inscripciones a torneos que todavía no comenzaron dejan de existir.
+                await _tournamentRepository.RemoveTeamFromUpcomingTournamentsAsync(teamId, cancellationToken);
+
                 // El equipo deja de existir: se retira su propio historial de ranking.
                 // Los puntos individuales de sus integrantes se conservan.
                 await _rankingService.RemoveTeamAsync(teamId, cancellationToken);
@@ -227,7 +253,9 @@ namespace ProyectAPI.Services
                 team.RankFilterValue = rankFilterValue;
             }
 
-            return await _teamRepository.UpdateAsync(team, cancellationToken);
+            var updated = await _teamRepository.UpdateAsync(team, cancellationToken);
+            if (updated) await SyncUpcomingRosterAsync(team, cancellationToken);
+            return updated;
         }
 
         // RF-13
@@ -249,8 +277,12 @@ namespace ProyectAPI.Services
             var memberToRemove = team.Members.FirstOrDefault(m => m.UserId == memberUserId);
             if (memberToRemove == null) return false;
 
+            await EnsureRosterChangesAllowedAsync(teamId, cancellationToken);
+
             team.Members.Remove(memberToRemove);
-            return await _teamRepository.UpdateAsync(team, cancellationToken);
+            var updated = await _teamRepository.UpdateAsync(team, cancellationToken);
+            if (updated) await SyncUpcomingRosterAsync(team, cancellationToken);
+            return updated;
         }
 
         // RF-14 y RF-15
@@ -266,6 +298,8 @@ namespace ProyectAPI.Services
 
             var member = team.Members.FirstOrDefault(m => m.UserId == memberUserId);
             if (member == null) return false;
+
+            await EnsureRosterChangesAllowedAsync(teamId, cancellationToken);
 
             var role = NormalizeTeamRole(newRole);
             var currentCaptain = team.Members.FirstOrDefault(m => m.UserId == team.CaptainId);
@@ -302,7 +336,29 @@ namespace ProyectAPI.Services
             }
 
             member.IsStarter = isStarter;
-            return await _teamRepository.UpdateAsync(team, cancellationToken);
+            var updated = await _teamRepository.UpdateAsync(team, cancellationToken);
+            if (updated) await SyncUpcomingRosterAsync(team, cancellationToken);
+            return updated;
+        }
+
+        private async Task EnsureRosterChangesAllowedAsync(string teamId, CancellationToken cancellationToken)
+        {
+            if (await _tournamentRepository.HasInProgressTournamentWithTeamAsync(teamId, cancellationToken))
+            {
+                throw new InvalidOperationException(
+                    "No se puede modificar la plantilla: el equipo tiene un torneo en curso. Los puntos de ese torneo se calculan con la plantilla inscripta.");
+            }
+        }
+
+        // Si el equipo todavía no empezó un torneo, su inscripción refleja la plantilla actual.
+        private async Task SyncUpcomingRosterAsync(Team team, CancellationToken cancellationToken)
+        {
+            var roster = team.Members
+                .Where(m => !string.IsNullOrWhiteSpace(m.UserId))
+                .Select(m => new TournamentRosterMember { UserId = m.UserId, Username = m.Username })
+                .ToList();
+
+            await _tournamentRepository.SyncTeamRosterInUpcomingTournamentsAsync(team.Id, team.Name, roster, cancellationToken);
         }
 
         private static string NormalizeTeamRole(string? role)
@@ -449,6 +505,9 @@ namespace ProyectAPI.Services
 
             var added = await _teamRepository.AddMemberAsync(team.Id, newMember, cancellationToken);
             if (!added) throw new InvalidOperationException("No se pudo agregar al equipo.");
+
+            team.Members.Add(newMember);
+            await SyncUpcomingRosterAsync(team, cancellationToken);
 
             invitation.Status = TeamInvitationStatus.Accepted;
             invitation.RespondedAt = DateTime.UtcNow;

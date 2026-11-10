@@ -28,7 +28,8 @@ namespace ProyectAPI.Controllers
             [FromQuery] string? rank,
             CancellationToken cancellationToken)
         {
-            var tournaments = await _tournamentService.GetAllTournamentsAsync(gameName, status, fromDate, toDate, rank, cancellationToken);
+            var includeCreator = IsStaff();
+            var tournaments = await _tournamentService.GetAllTournamentsAsync(gameName, status, fromDate, toDate, rank, includeCreator, cancellationToken);
             return Ok(tournaments);
         }
 
@@ -36,7 +37,7 @@ namespace ProyectAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TournamentResponse>> GetById(string id, CancellationToken cancellationToken)
         {
-            var tournament = await _tournamentService.GetTournamentByIdAsync(id, cancellationToken);
+            var tournament = await _tournamentService.GetTournamentByIdAsync(id, IsStaff(), cancellationToken);
             if (tournament == null) return NotFound(new { message = "Torneo no encontrado." });
             return Ok(tournament);
         }
@@ -46,9 +47,15 @@ namespace ProyectAPI.Controllers
         [Authorize(Roles = AppRoles.Staff)]
         public async Task<IActionResult> Create([FromBody] CreateTournamentRequest request, CancellationToken cancellationToken)
         {
+            var creatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(creatorId))
+            {
+                return Unauthorized(new { message = "No se pudo identificar al usuario." });
+            }
+
             try
             {
-                await _tournamentService.CreateTournamentAsync(request, cancellationToken);
+                await _tournamentService.CreateTournamentAsync(request, creatorId, cancellationToken);
                 return Ok(new { message = "Torneo creado con éxito." });
             }
             catch (InvalidOperationException ex)
@@ -56,6 +63,10 @@ namespace ProyectAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        // El creador de un torneo solo se expone a moderadores y administradores.
+        private bool IsStaff() =>
+            User.IsInRole(AppRoles.Moderator) || User.IsInRole(AppRoles.Admin);
 
         // Endpoint para registrarse en un torneo individual
         [HttpPost("{id}/register")]

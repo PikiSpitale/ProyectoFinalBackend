@@ -17,10 +17,19 @@ namespace ProyectAPI.Models
         public string Status { get; set; } = "Próximo";
         public int MaxParticipants { get; set; } = 32;
 
+        // Formato de los torneos por equipo: cuántos titulares y suplentes
+        // debe presentar cada equipo. Se configura por torneo (RF-21).
+        public int StartersCount { get; set; }
+        public int SubstitutesCount { get; set; }
+
         public string TournamentType { get; set; } = "Individual"; // Individual o Equipo
 
         public string Rules { get; set; } = string.Empty;
         public string RankConditions { get; set; } = string.Empty;
+
+        // Creador del torneo (solo visible para moderadores)
+        public string CreatedByUserId { get; set; } = string.Empty;
+        public string CreatedByUsername { get; set; } = string.Empty;
 
         // Nuevas propiedades de fechas para el torneo
         public DateTime StartDate { get; set; }
@@ -51,5 +60,17 @@ namespace ProyectAPI.Models
 
         public string? TeamId { get; set; }
         public string? TeamName { get; set; }
+
+        // Plantilla congelada al inscribir el equipo: se usa para acreditar los
+        // puntos del torneo aunque después cambie el equipo (RF-31/RF-32/RF-33).
+        public List<TournamentRosterMember> Roster { get; set; } = new();
+    }
+
+    // Integrante de un equipo al momento de inscribirse en el torneo.
+    [BsonIgnoreExtraElements]
+    public class TournamentRosterMember
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
     }
 }

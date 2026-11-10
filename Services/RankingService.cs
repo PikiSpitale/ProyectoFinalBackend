@@ -41,8 +41,9 @@ namespace ProyectAPI.Services
                     .Where(g => filter is null || IsSameGame(g.GameName, filter))
                     .ToList();
 
-                // En un ranking por juego solo participan quienes tienen ese juego vinculado.
-                if (filter is not null && games.Count == 0) continue;
+                // Solo participan del ranking quienes tienen al menos un juego
+                // vinculado (el ranking global tampoco incluye usuarios vacíos).
+                if (games.Count == 0) continue;
 
                 var gameDtos = games.Select(g => new RankingGameDto
                 {
@@ -83,6 +84,7 @@ namespace ProyectAPI.Services
                 .ThenByDescending(r => r.TournamentsWon)
                 .ThenByDescending(r => r.MatchesWon)
                 .ThenBy(r => r.Username, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(r => r.UserId, StringComparer.Ordinal)
                 .ToList();
 
             for (var i = 0; i < rows.Count; i++) rows[i].Position = i + 1;
@@ -299,6 +301,20 @@ namespace ProyectAPI.Services
                 .Select(p => p.TeamId!)
                 .ToHashSet(StringComparer.Ordinal);
 
+            // Plantilla congelada al inscribir: manda sobre el equipo actual. Si el
+            // torneo es viejo y no tiene snapshot, se usa la plantilla del equipo.
+            var rostersByTeamId = tournament.Participants
+                .Where(p => !string.IsNullOrWhiteSpace(p.TeamId) && p.Roster is { Count: > 0 })
+                .GroupBy(p => p.TeamId!, StringComparer.Ordinal)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.First().Roster
+                        .Where(m => !string.IsNullOrWhiteSpace(m.UserId))
+                        .Select(m => m.UserId)
+                        .Distinct(StringComparer.Ordinal)
+                        .ToList(),
+                    StringComparer.Ordinal);
+
             var start = tournament.StartDate == default ? DateTime.UtcNow : tournament.StartDate.ToUniversalTime();
             var end = tournament.EndDate == default ? start.AddDays(1) : tournament.EndDate.ToUniversalTime();
             if (end < start) end = start.AddDays(1);
@@ -340,13 +356,21 @@ namespace ProyectAPI.Services
 
             List<string> MemberIds(string? teamId, string fallbackUserId)
             {
-                if (!string.IsNullOrWhiteSpace(teamId) && teamsById.TryGetValue(teamId, out var team))
+                if (!string.IsNullOrWhiteSpace(teamId))
                 {
-                    return team.Members
-                        .Select(m => m.UserId)
-                        .Where(id => !string.IsNullOrWhiteSpace(id))
-                        .Distinct(StringComparer.Ordinal)
-                        .ToList();
+                    if (rostersByTeamId.TryGetValue(teamId, out var snapshot))
+                    {
+                        return snapshot;
+                    }
+
+                    if (teamsById.TryGetValue(teamId, out var team))
+                    {
+                        return team.Members
+                            .Select(m => m.UserId)
+                            .Where(id => !string.IsNullOrWhiteSpace(id))
+                            .Distinct(StringComparer.Ordinal)
+                            .ToList();
+                    }
                 }
 
                 return string.IsNullOrWhiteSpace(fallbackUserId)
@@ -372,28 +396,26 @@ namespace ProyectAPI.Services
 
                 if (disqualifiedTeams.Contains(teamId)) return;
 
-                if (!teamsById.ContainsKey(teamId))
+                // El movimiento a nivel equipo solo se registra si el equipo todavía existe.
+                if (teamsById.ContainsKey(teamId))
                 {
-                    // Equipo eliminado: se conserva al menos el crédito del capitán.
-                    AddUserCredit(fallbackUserId, teamId, type, points, description, occurredAt, matchId, round);
-                    return;
+                    result.Add(new PointTransaction
+                    {
+                        UserId = string.Empty,
+                        TeamId = teamId,
+                        GameName = gameName,
+                        TournamentId = tournament.Id,
+                        TournamentTitle = tournament.Title,
+                        Type = type,
+                        Points = points,
+                        Description = description,
+                        MatchId = matchId,
+                        Round = round,
+                        CreatedAt = occurredAt
+                    });
                 }
 
-                result.Add(new PointTransaction
-                {
-                    UserId = string.Empty,
-                    TeamId = teamId,
-                    GameName = gameName,
-                    TournamentId = tournament.Id,
-                    TournamentTitle = tournament.Title,
-                    Type = type,
-                    Points = points,
-                    Description = description,
-                    MatchId = matchId,
-                    Round = round,
-                    CreatedAt = occurredAt
-                });
-
+                // Los créditos individuales salen siempre de la plantilla del torneo.
                 foreach (var memberId in MemberIds(teamId, fallbackUserId ?? string.Empty))
                 {
                     AddUserCredit(memberId, teamId, type, points, description, occurredAt, matchId, round);
@@ -714,6 +736,8 @@ namespace ProyectAPI.Services
 
         private static int CalculatePosition(List<User> users, string userId, string gameName)
         {
+            // Mismo criterio de desempate que GetLeaderboardAsync: puntos →
+            // torneos ganados → partidos ganados → nombre → id.
             var rows = users
                 .Where(u => u.IsActive)
                 .Select(u =>
@@ -727,11 +751,15 @@ namespace ProyectAPI.Services
                         UserId = u.Id,
                         Username = u.Username,
                         HasGame = userGames.Count > 0,
-                        Points = userGames.Sum(g => g.Points)
+                        Points = userGames.Sum(g => g.Points),
+                        TournamentsWon = userGames.Sum(g => g.TournamentsWon),
+                        MatchesWon = userGames.Sum(g => g.MatchesWon)
                     };
                 })
                 .Where(u => u.HasGame)
                 .OrderByDescending(u => u.Points)
+                .ThenByDescending(u => u.TournamentsWon)
+                .ThenByDescending(u => u.MatchesWon)
                 .ThenBy(u => u.Username, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(u => u.UserId, StringComparer.Ordinal)
                 .ToList();

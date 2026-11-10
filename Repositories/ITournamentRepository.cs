@@ -30,5 +30,14 @@ namespace ProyectAPI.Repositories
 
         // RF-08: al desvincular un juego, se retiran las inscripciones a torneos "Próximo" de ese juego
         Task<long> RemoveParticipantFromUpcomingTournamentsAsync(string gameName, string userId, CancellationToken cancellationToken);
+
+        // Un equipo no puede modificar su plantilla ni eliminarse mientras tenga un torneo en curso.
+        Task<bool> HasInProgressTournamentWithTeamAsync(string teamId, CancellationToken cancellationToken);
+
+        // Al eliminar un equipo se retiran sus inscripciones a torneos que todavía no comenzaron.
+        Task<long> RemoveTeamFromUpcomingTournamentsAsync(string teamId, CancellationToken cancellationToken);
+
+        // Mantiene actualizada la plantilla congelada de las inscripciones a torneos "Próximo".
+        Task<long> SyncTeamRosterInUpcomingTournamentsAsync(string teamId, string teamName, List<TournamentRosterMember> roster, CancellationToken cancellationToken);
     }
 }
