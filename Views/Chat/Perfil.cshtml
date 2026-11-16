@@ -1,0 +1,156 @@
+@model ProyectoFinalBackend.Controllers.PerfilViewModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Perfil de Usuario</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/css/bootstrap.min.css" />
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Usuario @Model.ProfileUserId</h5>
+                        <p class="card-text">ID: @Model.ProfileUserId</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h6>Seguimiento con @Model.CurrentUserId</h6>
+                        
+                        <div id="followActions" class="mb-3">
+                            @if (Model.YaSigue)
+                            {
+                                <p class="text-success">✅ Ya sigues a este usuario</p>
+                                <button id="btnDejarSeguir" class="btn btn-danger btn-block">
+                                    <i class="fas fa-user-minus"></i> Dejar de seguir
+                                </button>
+                                <span style="margin-left:10px;">
+                                    <a href="/chat/enviar-mensaje/@Model.ProfileUserId" class="btn btn-outline-primary">
+                                        <i class="fas fa-paper-plane"></i> Enviar mensaje
+                                    </a>
+                                </span>
+                            }
+                            else
+                            {
+                                <button id="btnSeguir" class="btn btn-success btn-block">
+                                    <i class="fas fa-user-plus"></i> Seguir
+                                </button>
+                            }
+                        </div>
+                        
+                        <!-- Diálogo de confirmación para dejar de seguir -->
+                        <div id="confirmDialog" class="modal fade" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirmar</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>¿Estás seguro de dejar de seguir a este usuario?</p>
+                                        <p><small>Dejar de seguimiento removerá esta relación mutua.</small></p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="cancelar">Cancelar</button>
+                                        <button type="button" class="btn btn-danger" id="confirmAceptar">Aceptar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Datos desde el servidor
+        const currentUserId = "@Model.CurrentUserId";
+        const profileUserId = "@Model.ProfileUserId";
+        const yaSigue = @Model.YaSigue;
+        const token = '@Context.Request.Headers.Authorization.ToString().Replace("Bearer ", "")';
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarEstado(yaSigue);
+        });
+        
+        function actualizarEstado(sigue) {
+            if (sigue) {
+                document.getElementById('btnSeguir').style.display = 'none';
+                document.getElementById('btnDejarSeguir').style.display = 'inline-block';
+                document.getElementById('btnEnviarMsg').disabled = false;
+            } else {
+                document.getElementById('btnSeguir').style.display = 'inline-block';
+                document.getElementById('btnDejarSeguir').style.display = 'none';
+                document.getElementById('btnEnviarMsg').disabled = true;
+            }
+        }
+        
+        // Seguir usuario
+        document.getElementById('btnSeguir').addEventListener('click', function() {
+            fetch('/chat/seguir', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ targetId: profileUserId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    actualizarEstado(true);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+        
+        // Dejar de seguir con confirmación
+        document.getElementById('btnDejarSeguir').addEventListener('click', function() {
+            // Mostrar diálogo de confirmación
+            const modal = new bootstrap.Modal(document.getElementById('confirmDialog'));
+            modal.show();
+            
+            // Guardar referencia para después
+            window.confirmAction = function() {
+                fetch('/chat/dejar-seguir', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ targetId: profileUserId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        actualizarEstado(false);
+                        modal.hide();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            };
+        });
+        
+        // Manejar el diálogo
+        document.getElementById('confirmAceptar').onclick = window.confirmAction;
+        document.getElementById('confirmDialog').querySelector('.btn-close, #cancelar').onclick = function() {
+            modal.hide();
+        };
+        
+        // Enviar mensaje
+        document.getElementById('btnEnviarMsg').addEventListener('click', function() {
+            window.location.href = '/chat/enviar-mensaje/' + profileUserId;
+        });
+    </script>
+</body>
+</html>

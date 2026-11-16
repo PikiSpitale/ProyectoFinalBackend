@@ -9,6 +9,7 @@ using MongoDB.Driver;
 using ProyectAPI.Infrastructure;
 using ProyectAPI.Repositories;
 using ProyectAPI.Services;
+using ProyectoFinalBackend.Services;
 using System.IO;
 using System.Text;
 
@@ -62,6 +63,7 @@ builder.Services.AddScoped<TeamService>();
 builder.Services.AddScoped<IPointTransactionRepository, PointTransactionRepository>();
 builder.Services.AddScoped<RankingService>();
 builder.Services.AddHostedService<RankingBackfillService>();
+builder.Services.AddScoped<ChatService>();
 
 builder.Services.AddControllers();
 
