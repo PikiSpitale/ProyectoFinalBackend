@@ -7,11 +7,13 @@ namespace ProyectAPI.Repositories
     public sealed class UserRepository : IUserRepository
     {
         private readonly IMongoCollection<User> _users;
+        private readonly WalletRepository _wallets;
         private readonly Lazy<Task> _indexesInitialization;
 
         public UserRepository(MongoDbContext context)
         {
             _users = context.Database.GetCollection<User>("users");
+            _wallets = new WalletRepository(context);
             _indexesInitialization = new Lazy<Task>(CreateIndexesAsync);
         }
 
@@ -60,7 +62,8 @@ namespace ProyectAPI.Repositories
         )
         {
             await _indexesInitialization.Value.WaitAsync(cancellationToken);
-            await _users.InsertOneAsync(user, cancellationToken: cancellationToken);
+            if (string.IsNullOrEmpty(user.Id)) user.Id = MongoDB.Bson.ObjectId.GenerateNewId().ToString();
+            await _wallets.TransactionAsync(async (tx, ct) => { await tx.ProvisionAsync(user, ct); return true; }, cancellationToken);
             return user;
         }
 

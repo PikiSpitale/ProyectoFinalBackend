@@ -43,6 +43,8 @@ builder.Services.AddDataProtection()
 
 builder.Services.AddSingleton<MongoDbContext>();
 
+builder.Services.AddScoped<WalletRepository>();
+builder.Services.AddScoped<WalletService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
