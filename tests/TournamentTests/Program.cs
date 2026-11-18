@@ -11,7 +11,7 @@ var context=new MongoDbContext(Options.Create(new MongoDbSettings{ConnectionStri
 var db=context.Database;var checks=0;
 void Check(bool value,string name){if(!value)throw new Exception(name);Console.WriteLine("PASS "+name);checks++;}
 async Task Reject(Func<Task> action,string name){try{await action();}catch(InvalidOperationException){Check(true,name);return;}catch(WalletOperationException){Check(true,name);return;}throw new Exception("Expected rejection: "+name);}
-var users=new UserRepository(context);var wallet=new WalletRepository(context);var repo=new TournamentEconomyRepository(context);var clock=new Clock();var economy=new TournamentEconomyService(repo,wallet,clock);
+var users=new UserRepository(context);var wallet=new WalletRepository(context);var repo=new TournamentEconomyRepository(context);var clock=new Clock();var economy=new TournamentEconomyService(repo,wallet,clock,new EloService(new EloRepository(context),clock));
 var tournaments=new TournamentRepository(context);var matchRepo=new MatchRepository(context);
 var service=new TournamentService(tournaments,matchRepo,new TeamRepository(context),users,economy);
 var stats=new MatchStatsService(tournaments,matchRepo,economy);

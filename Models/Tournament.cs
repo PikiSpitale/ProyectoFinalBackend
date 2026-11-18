@@ -22,6 +22,7 @@ namespace ProyectAPI.Models
         public long RunnerUpPoints { get; set; } = 600;
         public long SemifinalPoints { get; set; } = 200;
         public long Revision { get; set; }
+        public int? EloRuleVersion { get; set; }
         public DateTime? ClosedAt { get; set; }
         public string? ClosedBy { get; set; }
         public List<TournamentMatch> ClosedResults { get; set; } = new();

@@ -4,7 +4,7 @@ using ProyectAPI.Models;
 using ProyectAPI.Repositories;
 namespace ProyectAPI.Services;
 
-public sealed class TournamentEconomyService(TournamentEconomyRepository repository, WalletRepository wallets, TimeProvider clock)
+public sealed class TournamentEconomyService(TournamentEconomyRepository repository, WalletRepository wallets, TimeProvider clock, EloService elo)
 {
     public DateTime UtcNow => clock.GetUtcNow().UtcDateTime;
     private static InvalidOperationException Error(string text) => new(text);
@@ -143,7 +143,10 @@ public sealed class TournamentEconomyService(TournamentEconomyRepository reposit
         if(t.Participants.Count(x=>!x.IsDisqualified)!=8) { await Cancel(t,wallet,ct);return false; }
         await repository.Save(t,ct); return true;
     }
-    public Task<bool> Close(string id,string actor,CancellationToken ct)=>Run(id,async(t,w,token)=>
+    public async Task<bool> Close(string id,string actor,CancellationToken ct)
+    {
+        await elo.Prepare(id,ct);
+        return await Run(id,async(t,w,token)=>
     {
         if(t==null)return false; if(t.ClosedAt!=null)return true;
         if(t.Status!=TournamentStatuses.Finished)throw Error("El torneo no terminó.");
@@ -175,8 +178,10 @@ public sealed class TournamentEconomyService(TournamentEconomyRepository reposit
                 if(amount>0)await w.CreditAsync(p.UserId,amount,"tournament_prize",id,"prize:"+id,token);
             }
         }
+        await elo.Process(t,matches,w.Session,token);
         t.ClosedAt=clock.GetUtcNow().UtcDateTime;t.ClosedBy=actor;t.ClosedResults=matches;await repository.Save(t,token);return true;
     },ct,true);
+    }
     private async Task<long> Cap(string user,long amount,WalletTransaction w,CancellationToken ct)
     {
         var day=TimeZoneInfo.ConvertTime(clock.GetUtcNow(),TimeZoneInfo.FindSystemTimeZoneById("America/Argentina/Cordoba")).ToString("yyyy-MM-dd");
