@@ -57,3 +57,7 @@ reconciliation. Real Google authentication requires separate browser
 credentials and was not contacted during these tests.
 
 Stage2 tournament points, stage3 redemptions and stage4 Elo are not implemented.
+
+## Reward redemption integration
+
+Stage3 uses the existing transaction and internal debit service. See [redemption API and verified catalogue](REWARD-REDEMPTIONS.md). No HTTP points-grant route is added.

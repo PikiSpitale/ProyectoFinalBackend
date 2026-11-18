@@ -44,6 +44,9 @@ builder.Services.AddDataProtection()
 builder.Services.AddSingleton<MongoDbContext>();
 
 builder.Services.AddScoped<WalletRepository>();
+builder.Services.AddSingleton<RewardCatalog>();
+builder.Services.AddScoped<RewardRepository>();
+builder.Services.AddScoped<RewardService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<TournamentEconomyRepository>();
 builder.Services.AddScoped<TournamentEconomyService>();
