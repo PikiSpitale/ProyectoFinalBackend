@@ -1,4 +1,4 @@
-﻿using ProyectAPI.DTOs;
+using ProyectAPI.DTOs;
 using ProyectAPI.Models;
 using ProyectAPI.Repositories;
 
@@ -6,19 +6,21 @@ namespace ProyectAPI.Services
 {
     public sealed class TournamentService : ITournamentService
     {
-        private const int MinParticipantsForBracket = 2;
+        private const int MinParticipantsForBracket = 8;
+        private readonly TournamentEconomyService _economy;
 
         private readonly ITournamentRepository _tournamentRepository;
         private readonly IMatchRepository _matchRepository;
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
 
-        public TournamentService(ITournamentRepository tournamentRepository, IMatchRepository matchRepository, ITeamRepository teamRepository, IUserRepository userRepository)
+        public TournamentService(ITournamentRepository tournamentRepository, IMatchRepository matchRepository, ITeamRepository teamRepository, IUserRepository userRepository, TournamentEconomyService economy)
         {
             _tournamentRepository = tournamentRepository;
             _matchRepository = matchRepository;
             _teamRepository = teamRepository;
             _userRepository = userRepository;
+            _economy = economy;
         }
 
         public async Task<List<TournamentResponse>> GetAllTournamentsAsync(CancellationToken cancellationToken)
@@ -46,13 +48,15 @@ namespace ProyectAPI.Services
                 throw new InvalidOperationException("El tipo de torneo debe ser 'Individual' o 'Equipo'.");
             }
 
+            if (request.MaxParticipants != 8) throw new InvalidOperationException("La economía inicial requiere ocho participantes o equipos.");
             var tournament = new Tournament
             {
                 Title = request.Title,
                 GameName = request.GameName,
                 BannerUrl = request.BannerUrl,
-                PrizePool = request.PrizePool,
-                MaxParticipants = request.MaxParticipants,
+                PrizePool = request.IsFree ? 0 : type == "Equipo" ? 10000 : 2000,
+                EconomyVersion = 1, IsFree = request.IsFree, EntryPoints = request.IsFree ? 0 : 250,
+                MaxParticipants = 8,
                 TournamentType = type,
                 Rules = request.Rules,
                 RankConditions = request.RankConditions,
@@ -64,123 +68,18 @@ namespace ProyectAPI.Services
             await _tournamentRepository.CreateAsync(tournament, cancellationToken);
         }
 
-        public async Task<bool> RegisterParticipantAsync(string tournamentId, TournamentParticipantDto participantDto, CancellationToken cancellationToken)
-        {
-            var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
-            if (tournament is null) return false;
-
-            // La inscripción solo está abierta mientras el torneo no haya comenzado
-            if (tournament.Status != TournamentStatuses.Upcoming) return false;
-            if (tournament.Participants.Count >= tournament.MaxParticipants) return false;
-
-            // Ventana de inscripción: habilitar 30 minutos antes del inicio
-            if (DateTime.UtcNow < tournament.StartDate.AddMinutes(-30)) return false;
-
-            if (tournament.TournamentType == "Individual")
+        public Task<bool> RegisterParticipantAsync(string tournamentId, TournamentParticipantDto participantDto, CancellationToken ct)
+            => _economy.Register(tournamentId, participantDto.UserId, null, ct);
+        public Task<bool> RegisterTeamAsync(string tournamentId, string teamId, string currentUserId, CancellationToken ct)
+            => _economy.Register(tournamentId, currentUserId, teamId, ct);
+        public Task<bool> DeleteTournamentAsync(string id, CancellationToken ct)
+            => _economy.Run(id, async (t,w,token) =>
             {
-                if (tournament.Participants.Any(p => p.UserId == participantDto.UserId)) return false;
-
-                // Validar que el jugador tenga el juego asociado en su perfil con nombre y rango
-                var user = await _userRepository.GetByIdAsync(participantDto.UserId, cancellationToken);
-                var userGame = user?.Games?.FirstOrDefault(g => g.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase));
-                if (userGame is null || string.IsNullOrWhiteSpace(userGame.InGameName) || string.IsNullOrWhiteSpace(userGame.Rank))
-                {
-                    throw new InvalidOperationException("Debes tener el videojuego asociado a tu perfil con nombre de usuario y rango para inscribirte.");
-                }
-
-                var participant = new TournamentParticipant
-                {
-                    UserId = participantDto.UserId,
-                    Username = string.IsNullOrWhiteSpace(participantDto.Username) ? user.Username : participantDto.Username,
-                    InGameName = string.IsNullOrWhiteSpace(userGame.InGameName) ? participantDto.InGameName : userGame.InGameName,
-                    Rank = string.IsNullOrWhiteSpace(userGame.Rank) ? participantDto.Rank : userGame.Rank,
-                    RegisteredAt = DateTime.UtcNow
-                };
-
-                return await _tournamentRepository.AddParticipantAsync(tournamentId, participant, cancellationToken);
-            }
-            else if (tournament.TournamentType == "Equipo")
-            {
-                throw new InvalidOperationException("Para inscribirse a un torneo por equipos, debés usar el endpoint de inscripción por equipo.");
-            }
-
-            return false;
-        }
-
-        public async Task<bool> RegisterTeamAsync(string tournamentId, string teamId, string currentUserId, CancellationToken cancellationToken)
-        {
-            var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
-            if (tournament is null) return false;
-
-            if (tournament.Status != TournamentStatuses.Upcoming) return false;
-            if (tournament.Participants.Count >= tournament.MaxParticipants) return false;
-            if (DateTime.UtcNow < tournament.StartDate.AddMinutes(-30)) return false;
-
-            if (tournament.TournamentType != "Equipo")
-            {
-                throw new InvalidOperationException("Este torneo es individual.");
-            }
-
-            if (tournament.Participants.Any(p => p.TeamId == teamId)) return false;
-
-            var team = await _teamRepository.GetByIdAsync(teamId, cancellationToken);
-            if (team == null) throw new InvalidOperationException("Equipo no encontrado.");
-            if (team.CaptainId != currentUserId) throw new InvalidOperationException("Solo el capitán puede inscribir el equipo al torneo.");
-            if (!string.IsNullOrWhiteSpace(team.GameName) && !team.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidOperationException("El equipo debe pertenecer al mismo videojuego que el torneo.");
-            }
-
-            // Requerido: 5 titulares + 2 suplentes
-            var starters = team.Members.Where(m => m.IsStarter).ToList();
-            var substitutes = team.Members.Where(m => !m.IsStarter).ToList();
-            if (starters.Count != 5 || substitutes.Count != 2)
-            {
-                throw new InvalidOperationException("El equipo debe tener exactamente 5 titulares y 2 suplentes para inscribirse a torneos grupales.");
-            }
-
-            // Verificar que todos los integrantes tengan el juego con in-game name y rango
-            foreach (var member in team.Members)
-            {
-                var memberUser = await _userRepository.GetByIdAsync(member.UserId, cancellationToken);
-                var mg = memberUser?.Games?.FirstOrDefault(g => g.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase));
-                if (mg is null || string.IsNullOrWhiteSpace(mg.InGameName) || string.IsNullOrWhiteSpace(mg.Rank))
-                {
-                    throw new InvalidOperationException($"El integrante {member.Username} debe tener el videojuego asociado con nombre de usuario y rango.");
-                }
-            }
-
-            // Inscribir al equipo: según modelo actual de participantes, se agrega un registro por equipo (representante)
-            var captain = team.Members.FirstOrDefault(m => m.UserId == team.CaptainId);
-            var captainUser = captain is null ? null : await _userRepository.GetByIdAsync(captain.UserId, cancellationToken);
-            var captainGame = captainUser?.Games?.FirstOrDefault(g => g.GameName.Equals(tournament.GameName, StringComparison.OrdinalIgnoreCase));
-
-            var participant = new TournamentParticipant
-            {
-                UserId = team.CaptainId,
-                Username = captain?.Username ?? team.Name,
-                InGameName = captainGame?.InGameName ?? team.Name,
-                Rank = captainGame?.Rank ?? string.Empty,
-                RegisteredAt = DateTime.UtcNow,
-                TeamId = team.Id,
-                TeamName = team.Name
-            };
-
-            return await _tournamentRepository.AddParticipantAsync(tournamentId, participant, cancellationToken);
-        }
-
-        public async Task<bool> DeleteTournamentAsync(string id, CancellationToken cancellationToken)
-        {
-            var deleted = await _tournamentRepository.DeleteAsync(id, cancellationToken);
-
-            // Si el torneo tenía llaves, se borran también sus enfrentamientos
-            if (deleted)
-            {
-                await _matchRepository.DeleteByTournamentAsync(id, cancellationToken);
-            }
-
-            return deleted;
-        }
+                if (t is null) return false;
+                if (t.Enrollments.Count > 0) throw new InvalidOperationException("El torneo tiene inscripciones; usá cancelar para conservar historial y reembolsar.");
+                await _matchRepository.DeleteByTournamentAsync(id,token);
+                return await _tournamentRepository.DeleteAsync(id,token);
+            },ct);
 
         public async Task<List<MatchResponse>?> GetMatchesAsync(string tournamentId, CancellationToken cancellationToken)
         {
@@ -191,7 +90,15 @@ namespace ProyectAPI.Services
             return MapMatches(matches);
         }
 
-        public async Task<List<MatchResponse>?> GenerateBracketAsync(string tournamentId, CancellationToken cancellationToken)
+        public Task<List<MatchResponse>?> GenerateBracketAsync(string tournamentId, CancellationToken cancellationToken)
+            => _economy.Run<List<MatchResponse>?>(tournamentId, async (t,w,token) =>
+            {
+                if (t is null) return null;
+                if (!await _economy.PrepareStart(t,w,token)) return new List<MatchResponse>();
+                return await GenerateBracketAsyncCore(tournamentId,token);
+            }, cancellationToken);
+
+        private async Task<List<MatchResponse>?> GenerateBracketAsyncCore(string tournamentId, CancellationToken cancellationToken)
         {
             var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
             if (tournament is null) return null;
@@ -202,17 +109,17 @@ namespace ProyectAPI.Services
 
         public async Task<int> GenerateDueBracketsAsync(CancellationToken cancellationToken)
         {
-            var dueTournaments = await _tournamentRepository.GetDueForBracketAsync(DateTime.UtcNow, cancellationToken);
+            var dueTournaments = await _tournamentRepository.GetDueForBracketAsync(_economy.UtcNow, cancellationToken);
             var generated = 0;
 
             foreach (var tournament in dueTournaments)
             {
                 // Sin rivales suficientes todavía: se vuelve a intentar en la próxima pasada
-                if (tournament.Participants.Count(p => !p.IsDisqualified) < MinParticipantsForBracket) continue;
+
 
                 try
                 {
-                    await BuildAndSaveBracketAsync(tournament, cancellationToken);
+                    await GenerateBracketAsync(tournament.Id, cancellationToken);
                     generated++;
                 }
                 catch (InvalidOperationException)
@@ -224,7 +131,14 @@ namespace ProyectAPI.Services
             return generated;
         }
 
-        public async Task<List<MatchResponse>?> SetMatchResultAsync(string tournamentId, string matchId, MatchResultRequest request, CancellationToken cancellationToken)
+        public Task<List<MatchResponse>?> SetMatchResultAsync(string tournamentId, string matchId, MatchResultRequest request, CancellationToken cancellationToken)
+            => _economy.Run<List<MatchResponse>?>(tournamentId, async (t,w,token) =>
+            {
+                if (t is null) return null;
+                return await SetMatchResultAsyncCore(tournamentId, matchId, request,token);
+            }, cancellationToken);
+
+        private async Task<List<MatchResponse>?> SetMatchResultAsyncCore(string tournamentId, string matchId, MatchResultRequest request, CancellationToken cancellationToken)
         {
             var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
             if (tournament is null) return null;
@@ -257,7 +171,14 @@ namespace ProyectAPI.Services
             return MapMatches(matches);
         }
 
-        public async Task<List<MatchResponse>?> AdjustMatchScoreAsync(string tournamentId, string matchId, MatchScoreRequest request, CancellationToken cancellationToken)
+        public Task<List<MatchResponse>?> AdjustMatchScoreAsync(string tournamentId, string matchId, MatchScoreRequest request, CancellationToken cancellationToken)
+            => _economy.Run<List<MatchResponse>?>(tournamentId, async (t,w,token) =>
+            {
+                if (t is null) return null;
+                return await AdjustMatchScoreAsyncCore(tournamentId, matchId, request,token);
+            }, cancellationToken);
+
+        private async Task<List<MatchResponse>?> AdjustMatchScoreAsyncCore(string tournamentId, string matchId, MatchScoreRequest request, CancellationToken cancellationToken)
         {
             var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
             if (tournament is null) return null;
@@ -315,7 +236,14 @@ namespace ProyectAPI.Services
             return MapMatches(matches);
         }
 
-        public async Task<List<MatchResponse>?> DisqualifyParticipantAsync(string tournamentId, string userId, string? reason, CancellationToken cancellationToken)
+        public Task<List<MatchResponse>?> DisqualifyParticipantAsync(string tournamentId, string userId, string? reason, CancellationToken cancellationToken)
+            => _economy.Run<List<MatchResponse>?>(tournamentId, async (t,w,token) =>
+            {
+                if (t is null) return null;
+                return await DisqualifyParticipantAsyncCore(tournamentId, userId, reason,token);
+            }, cancellationToken);
+
+        private async Task<List<MatchResponse>?> DisqualifyParticipantAsyncCore(string tournamentId, string userId, string? reason, CancellationToken cancellationToken)
         {
             var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
             if (tournament is null) return null;
@@ -513,20 +441,9 @@ namespace ProyectAPI.Services
                 throw new InvalidOperationException("Las llaves de este torneo ya fueron generadas.");
             }
 
-            try
-            {
-                var matches = BracketGenerator.Generate(tournament);
-                await _matchRepository.InsertManyAsync(matches, cancellationToken);
-                return matches;
-            }
-            catch
-            {
-                // Si algo falla, el torneo vuelve a quedar abierto
-                await _matchRepository.DeleteByTournamentAsync(tournament.Id, CancellationToken.None);
-                await _tournamentRepository.TryChangeStatusAsync(
-                    tournament.Id, TournamentStatuses.InProgress, TournamentStatuses.Upcoming, CancellationToken.None);
-                throw;
-            }
+            var matches = BracketGenerator.Generate(tournament);
+            await _matchRepository.InsertManyAsync(matches, cancellationToken);
+            return matches;
         }
 
         // ----- Mapeos -----
@@ -557,7 +474,7 @@ namespace ProyectAPI.Services
                         p.DisqualificationReason,
                         p.TeamId,
                         p.TeamName))
-                    .ToList()
+                    .ToList(), t.IsFree, t.EntryPoints, t.ChampionPoints, t.RunnerUpPoints, t.SemifinalPoints, t.ClosedAt
             );
         }
 

@@ -1,4 +1,4 @@
-﻿namespace ProyectAPI.DTOs
+namespace ProyectAPI.DTOs
 {
     public record CreateTournamentRequest(
         string Title,
@@ -10,7 +10,8 @@
         string RankConditions,
         DateTime StartDate,
         DateTime EndDate,
-        string TournamentType = "Individual"
+        string TournamentType = "Individual",
+        bool IsFree = false
     );
 
     public record TournamentResponse(
@@ -26,7 +27,9 @@
         string RankConditions,
         DateTime StartDate,
         DateTime EndDate,
-        List<TournamentParticipantDto> Participants
+        List<TournamentParticipantDto> Participants,
+        bool IsFree = false, long EntryPoints = 250, long ChampionPoints = 1000,
+        long RunnerUpPoints = 600, long SemifinalPoints = 200, DateTime? ClosedAt = null
     );
 
     public record TournamentParticipantDto(

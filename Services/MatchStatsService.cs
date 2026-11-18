@@ -1,4 +1,4 @@
-﻿using ProyectAPI.DTOs;
+using ProyectAPI.DTOs;
 using ProyectAPI.Models;
 using ProyectAPI.Repositories;
 
@@ -6,13 +6,14 @@ namespace ProyectAPI.Services
 {
     public sealed class MatchStatsService : IMatchStatsService
     {
+        private readonly TournamentEconomyService _economy;
         private readonly ITournamentRepository _tournamentRepository;
         private readonly IMatchRepository _matchRepository;
 
-        public MatchStatsService(ITournamentRepository tournamentRepository, IMatchRepository matchRepository)
+        public MatchStatsService(ITournamentRepository tournamentRepository, IMatchRepository matchRepository, TournamentEconomyService economy)
         {
             _tournamentRepository = tournamentRepository;
-            _matchRepository = matchRepository;
+            _matchRepository = matchRepository; _economy = economy;
         }
 
         public async Task<MatchDetailResponse?> GetMatchDetailAsync(string tournamentId, string matchId, CancellationToken cancellationToken)
@@ -27,7 +28,9 @@ namespace ProyectAPI.Services
             return BuildDetail(tournament, matches, match);
         }
 
-        public async Task<MatchDetailResponse?> UpdateStatAsync(string tournamentId, string matchId, MatchStatRequest request, CancellationToken cancellationToken)
+        public Task<MatchDetailResponse?> UpdateStatAsync(string tournamentId, string matchId, MatchStatRequest request, CancellationToken ct)
+            => _economy.Run<MatchDetailResponse?>(tournamentId, (t,w,token) => UpdateStatCoreAsync(tournamentId,matchId,request,token),ct);
+        private async Task<MatchDetailResponse?> UpdateStatCoreAsync(string tournamentId, string matchId, MatchStatRequest request, CancellationToken cancellationToken)
         {
             var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, cancellationToken);
             if (tournament is null) return null;

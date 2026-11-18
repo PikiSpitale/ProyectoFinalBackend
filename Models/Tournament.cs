@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace ProyectAPI.Models
@@ -14,7 +14,18 @@ namespace ProyectAPI.Models
         public string BannerUrl { get; set; } = string.Empty;
         public decimal PrizePool { get; set; } = 0;
         public string Status { get; set; } = "Próximo";
-        public int MaxParticipants { get; set; } = 32;
+        public int MaxParticipants { get; set; } = 8;
+        public int EconomyVersion { get; set; }
+        public bool IsFree { get; set; }
+        public long EntryPoints { get; set; } = 250;
+        public long ChampionPoints { get; set; } = 1000;
+        public long RunnerUpPoints { get; set; } = 600;
+        public long SemifinalPoints { get; set; } = 200;
+        public long Revision { get; set; }
+        public DateTime? ClosedAt { get; set; }
+        public string? ClosedBy { get; set; }
+        public List<TournamentMatch> ClosedResults { get; set; } = new();
+        public List<TournamentEnrollment> Enrollments { get; set; } = new();
 
         public string TournamentType { get; set; } = "Individual"; // Individual o Equipo
 

@@ -1,4 +1,4 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
 using ProyectAPI.Infrastructure;
 using ProyectAPI.Models;
 
@@ -17,11 +17,11 @@ namespace ProyectAPI.Repositories
 
         // Obtener lista completa de torneos
         public async Task<List<Tournament>> GetAllAsync(CancellationToken cancellationToken) =>
-            await _tournamentsCollection.Find(_ => true).ToListAsync(cancellationToken);
+            await _tournamentsCollection.ScopedFind(_ => true).ToListAsync(cancellationToken);
 
         // Obtener un torneo por su ID
         public async Task<Tournament?> GetByIdAsync(string id, CancellationToken cancellationToken) =>
-            await _tournamentsCollection.Find(t => t.Id == id).FirstOrDefaultAsync(cancellationToken);
+            await _tournamentsCollection.ScopedFind(t => t.Id == id).FirstOrDefaultAsync(cancellationToken);
 
         // Crear un nuevo torneo incluyendo validación de fechas (fin no anterior a inicio)
         public async Task CreateAsync(Tournament tournament, CancellationToken cancellationToken)
@@ -31,7 +31,7 @@ namespace ProyectAPI.Repositories
                 throw new InvalidOperationException("La fecha de finalización no puede ser anterior a la fecha de inicio del torneo.");
             }
 
-            await _tournamentsCollection.InsertOneAsync(tournament, null, cancellationToken);
+            await _tournamentsCollection.ScopedInsertOneAsync(tournament, null, cancellationToken);
         }
 
         // Agregar un participante al torneo.
@@ -46,14 +46,14 @@ namespace ProyectAPI.Repositories
                 )
             );
             var update = Builders<Tournament>.Update.Push(t => t.Participants, participant);
-            var result = await _tournamentsCollection.UpdateOneAsync(filter, update, null, cancellationToken);
+            var result = await _tournamentsCollection.ScopedUpdateOneAsync(filter, update, null, cancellationToken);
             return result.ModifiedCount > 0;
         }
 
         // Eliminar un torneo por su ID
         public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken)
         {
-            var result = await _tournamentsCollection.DeleteOneAsync(t => t.Id == id, cancellationToken);
+            var result = await _tournamentsCollection.ScopedDeleteOneAsync(t => t.Id == id, cancellationToken);
             return result.DeletedCount > 0;
         }
 
@@ -65,14 +65,14 @@ namespace ProyectAPI.Repositories
                 Builders<Tournament>.Filter.Eq(t => t.Status, expectedStatus)
             );
             var update = Builders<Tournament>.Update.Set(t => t.Status, newStatus);
-            var result = await _tournamentsCollection.UpdateOneAsync(filter, update, null, cancellationToken);
+            var result = await _tournamentsCollection.ScopedUpdateOneAsync(filter, update, null, cancellationToken);
             return result.ModifiedCount > 0;
         }
 
         // Torneos que todavía no empezaron pero cuya fecha de inicio ya pasó
         public async Task<List<Tournament>> GetDueForBracketAsync(DateTime utcNow, CancellationToken cancellationToken) =>
             await _tournamentsCollection
-                .Find(t => t.Status == TournamentStatuses.Upcoming && t.StartDate <= utcNow)
+                .ScopedFind(t => t.Status == TournamentStatuses.Upcoming && t.StartDate <= utcNow)
                 .ToListAsync(cancellationToken);
 
         // Marca como descalificado al participante (solo ese elemento del arreglo)
@@ -89,7 +89,7 @@ namespace ProyectAPI.Repositories
                 Builders<Tournament>.Update.Set(t => t.Participants[-1].DisqualificationReason, reason)
             );
 
-            var result = await _tournamentsCollection.UpdateOneAsync(filter, update, null, cancellationToken);
+            var result = await _tournamentsCollection.ScopedUpdateOneAsync(filter, update, null, cancellationToken);
             return result.ModifiedCount > 0;
         }
     }

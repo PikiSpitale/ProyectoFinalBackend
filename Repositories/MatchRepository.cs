@@ -1,4 +1,4 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
 using ProyectAPI.Infrastructure;
 using ProyectAPI.Models;
 
@@ -16,7 +16,7 @@ namespace ProyectAPI.Repositories
         // Enfrentamientos de un torneo ordenados por ronda y posición
         public async Task<List<TournamentMatch>> GetByTournamentAsync(string tournamentId, CancellationToken cancellationToken) =>
             await _matchesCollection
-                .Find(m => m.TournamentId == tournamentId)
+                .ScopedFind(m => m.TournamentId == tournamentId)
                 .SortBy(m => m.Round).ThenBy(m => m.Position)
                 .ToListAsync(cancellationToken);
 
@@ -25,13 +25,13 @@ namespace ProyectAPI.Repositories
             var list = matches.ToList();
             if (list.Count == 0) return;
 
-            await _matchesCollection.InsertManyAsync(list, null, cancellationToken);
+            await _matchesCollection.ScopedInsertManyAsync(list, null, cancellationToken);
         }
 
         public async Task DeleteByTournamentAsync(string tournamentId, CancellationToken cancellationToken) =>
-            await _matchesCollection.DeleteManyAsync(m => m.TournamentId == tournamentId, cancellationToken);
+            await _matchesCollection.ScopedDeleteManyAsync(m => m.TournamentId == tournamentId, cancellationToken);
 
         public async Task UpdateAsync(TournamentMatch match, CancellationToken cancellationToken) =>
-            await _matchesCollection.ReplaceOneAsync(m => m.Id == match.Id, match, new ReplaceOptions(), cancellationToken);
+            await _matchesCollection.ScopedReplaceOneAsync(m => m.Id == match.Id, match, new ReplaceOptions(), cancellationToken);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectAPI.DTOs;
 using ProyectAPI.Models;
@@ -8,6 +8,7 @@ using System.Security.Claims;
 namespace ProyectAPI.Controllers
 {
     [ApiController]
+    [TournamentEconomyExceptionFilter]
     [Route("api/[controller]")]
     public class TournamentsController : ControllerBase
     {
@@ -105,7 +106,7 @@ namespace ProyectAPI.Controllers
                     return BadRequest(new { message = "No se pudo realizar la inscripción del equipo. Verificá cupo, tipo de torneo, ventana de inscripción (30 min antes) o que ya esté inscrito." });
                 }
 
-                return Ok(new { message = "¡Equipo inscripto exitosamente al torneo!" });
+                return Ok(new { message = "Solicitud de equipo creada. Consultá enrollments; cada titular debe confirmar antes de obtener cupo." });
             }
             catch (InvalidOperationException ex)
             {
