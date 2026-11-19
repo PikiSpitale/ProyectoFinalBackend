@@ -2,7 +2,11 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using ProyectAPI.Controllers;
@@ -14,7 +18,20 @@ using ProyectAPI.Services;
 var checks = 0;
 void Check(bool ok, string name) { if (!ok) throw new Exception(name); checks++; Console.WriteLine("PASS " + name); }
 async Task Error(string code, Func<Task> action) { try { await action(); } catch (WalletOperationException e) { Check(e.Code == code, code); return; } throw new Exception("Expected " + code); }
-var catalog = new RewardCatalog();
+using var provider = new ServiceCollection().AddSingleton<RewardCatalog>().BuildServiceProvider();
+var mvcServices = new ServiceCollection().AddLogging();
+mvcServices.AddControllers();
+using var mvc = mvcServices.BuildServiceProvider();
+void ValidateRequest(RewardRedemptionRequest request, bool valid)
+{
+    var action = new ActionContext(new DefaultHttpContext { RequestServices = mvc }, new RouteData(), new ActionDescriptor());
+    mvc.GetRequiredService<IObjectModelValidator>().Validate(action, null, string.Empty, request);
+    Check(action.ModelState.IsValid == valid, valid ? "MVC accepts valid redemption" : "MVC rejects invalid redemption");
+}
+ValidateRequest(new("steam-usd-10", "mvc-test"), true);
+ValidateRequest(new("invalid product", "mvc-test"), false);
+ValidateRequest(new("steam-usd-10", ""), false);
+var catalog = provider.GetRequiredService<RewardCatalog>();
 Check(catalog.Products().Any(x => x.Id == "steam-usd-10"), "verified Steam USD10 catalogue");
 Check(catalog.Products().Select(x => x.Platform).Distinct().Count() == 7 && catalog.Products().Count(x => x.Platform == "Riot") == 2, "all required platforms and separate Riot products");
 Check(catalog.Products().All(x => x.Currency == "USD" && x.Region == "US" && x.CostPoints == x.FaceValue * 2000), "real USD face values and server prices");

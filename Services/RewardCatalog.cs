@@ -6,12 +6,13 @@ public sealed class RewardCatalog
 {
     private readonly IReadOnlyDictionary<string, RewardProduct> _products;
     public RewardCatalog() : this(DefaultProducts()) { }
-    public RewardCatalog(IEnumerable<RewardProduct> products) => _products = products.ToDictionary(x => x.Id, StringComparer.Ordinal);
+    // IReadOnlyList keeps DI from resolving this fixture overload as an empty IEnumerable.
+    public RewardCatalog(IReadOnlyList<RewardProduct> products) => _products = products.ToDictionary(x => x.Id, StringComparer.Ordinal);
     public IReadOnlyList<RewardProduct> Products() => _products.Values.OrderBy(x => x.Platform).ThenBy(x => x.FaceValue).ToArray();
     public RewardProduct? Find(string id) => _products.GetValueOrDefault(id);
     private static RewardProduct Card(string id, string platform, string name, int usd, string credit, string compatibility, string source) =>
         new(id, platform, name, "US", "USD", usd, checked(usd * 2000L), credit, true, compatibility, source);
-    private static IEnumerable<RewardProduct> DefaultProducts() => new[]
+    private static IReadOnlyList<RewardProduct> DefaultProducts() => new[]
     {
         Card("steam-usd-10","Steam","Steam Wallet gift card",10,"PlatformBalance","US USD Steam Wallet; wallet currency restrictions apply.","https://www.gamestop.com/products/valve-steam-wallet-card-10/11109954.html"),
         Card("steam-usd-20","Steam","Steam Wallet gift card",20,"PlatformBalance","US USD Steam Wallet; wallet currency restrictions apply.","https://www.bestbuy.com/product/valve-steam-wallet-20-gift-card/J33V32XTKG"),

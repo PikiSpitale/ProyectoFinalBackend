@@ -1,5 +1,17 @@
 # Reward redemptions (stage 3)
 
+## Frontend host integration verification (2026-11-19)
+
+Live API/browser checks exposed two host-level issues that direct service tests
+did not cover. Dependency injection selected the test catalog constructor with
+an empty enumerable; its input is now IReadOnlyList so the normal registration
+uses the default nine products. MVC validation attributes now target positional
+record constructor parameters, preventing a validation exception before the
+redemption action. RewardTests resolves the actual DI registration and runs MVC
+object validation for valid/invalid payloads. Both failures were reproduced
+before their fixes; all66 reward checks now pass, independently rechecked.
+Live simulated redemption confirmed22,500→2,500, receipt and ledger persistence.
+
 The catalogue describes real products, real USD face values and a US region.
 Every delivered code is fictitious. No provider is contacted and no store funds,
 real card inventory, purchases or payments are involved. The platform never
