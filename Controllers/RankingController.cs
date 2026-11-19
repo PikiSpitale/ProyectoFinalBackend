@@ -15,6 +15,10 @@ public sealed class RankingsController(RankingService service) : ControllerBase
     public Task<ActionResult> PlayerHistory(string entityId, [FromQuery] string? gameName, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default) => Respond(async () => new { page, pageSize, items = await service.History("player", entityId, gameName, page, pageSize, ct) });
     [HttpGet("teams/{entityId}/history")]
     public Task<ActionResult> TeamHistory(string entityId, [FromQuery] string? gameName, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default) => Respond(async () => new { page, pageSize, items = await service.History("team", entityId, gameName, page, pageSize, ct) });
+    [HttpGet("players/{entityId}")]
+    public Task<ActionResult> PlayerCurrent(string entityId, [FromQuery] string? gameName, CancellationToken ct = default) => Respond(async () => await service.Current("player", entityId, gameName, ct));
+    [HttpGet("teams/{entityId}")]
+    public Task<ActionResult> TeamCurrent(string entityId, [FromQuery] string? gameName, CancellationToken ct = default) => Respond(async () => await service.Current("team", entityId, gameName, ct));
     private async Task<ActionResult> Respond(Func<Task<object>> action)
     {
         try { return Ok(await action()); }

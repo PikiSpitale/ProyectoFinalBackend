@@ -67,6 +67,8 @@ builder.Services.AddScoped<TeamService>();
 
 // Registro de dependencias para el Módulo de Rankings
 builder.Services.AddScoped<RankingService>();
+builder.Services.AddScoped<FrontendReadRepository>();
+builder.Services.AddScoped<FrontendReadService>();
 builder.Services.AddScoped<EloRepository>();
 builder.Services.AddScoped<EloService>();
 

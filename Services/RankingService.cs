@@ -19,6 +19,8 @@ public sealed class RankingService(EloRepository repository)
         Page(page, pageSize); var game = EloCalculator.Game(gameName); var entity = WalletRepository.UserId(entityId);
         return repository.History(kind, entity, game, page, pageSize, ct);
     }
+    public Task<CurrentEloDto> Current(string kind, string entityId, string? gameName, CancellationToken ct)
+        => repository.Current(kind, WalletRepository.UserId(entityId), EloCalculator.Game(gameName), ct);
     // Compatibility endpoint: same array/fields; Points is now a deprecated alias for per-game Elo.
     public async Task<IEnumerable<UserRankingDto>> GetLeaderboardAsync(string? gameName, CancellationToken ct)
     {

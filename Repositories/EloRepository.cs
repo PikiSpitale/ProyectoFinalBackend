@@ -44,4 +44,20 @@ public sealed class EloRepository
     public Task Append(EloAdjustment change, IClientSessionHandle session, CancellationToken ct) => Changes.InsertOneAsync(session, change, cancellationToken: ct);
     public Task<List<EloRating>> Rankings(string kind, string? game, int page, int size, CancellationToken ct) => Ratings(kind).Find(game == null ? Builders<EloRating>.Filter.Empty : Builders<EloRating>.Filter.Eq(x => x.GameName, game)).SortByDescending(x => x.Rating).ThenBy(x => x.NameSort).ThenBy(x => x.EntityId).ThenBy(x => x.GameName).Skip(checked((page - 1) * size)).Limit(size).ToListAsync(ct);
     public Task<List<EloAdjustment>> History(string kind, string entity, string game, int page, int size, CancellationToken ct) => Changes.Find(x => x.Kind == kind && x.EntityId == entity && x.GameName == game).SortByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id).Skip(checked((page - 1) * size)).Limit(size).ToListAsync(ct);
+    public async Task<ProyectAPI.DTOs.CurrentEloDto> Current(string kind, string entity, string game, CancellationToken ct)
+    {
+        using var session = await _db.Client.StartSessionAsync(cancellationToken: ct);
+        return await session.WithTransactionAsync(async (snapshot, token) =>
+        {
+            var collection = Ratings(kind);
+            var value = await collection.Find(snapshot, x => x.EntityId == entity && x.GameName == game).FirstOrDefaultAsync(token);
+            if (value == null) return new ProyectAPI.DTOs.CurrentEloDto(entity, game, kind, null, null, 0, 0, 0);
+            var f = Builders<EloRating>.Filter;
+            var before = f.Eq(x => x.GameName, game) & (f.Gt(x => x.Rating, value.Rating)
+                | (f.Eq(x => x.Rating, value.Rating) & f.Lt(x => x.NameSort, value.NameSort))
+                | (f.Eq(x => x.Rating, value.Rating) & f.Eq(x => x.NameSort, value.NameSort) & f.Lt(x => x.EntityId, value.EntityId)));
+            var position = await collection.CountDocumentsAsync(snapshot, before, cancellationToken: token) + 1;
+            return new ProyectAPI.DTOs.CurrentEloDto(entity, game, kind, value.Rating, position, value.MatchesPlayed, value.MatchesWon, value.MatchesLost);
+        }, new TransactionOptions(readConcern: ReadConcern.Snapshot), ct);
+    }
 }
