@@ -30,6 +30,14 @@ namespace ProyectAPI.Services
             new("gold", "Oro", 100, null)
         };
 
+        private static readonly List<StatDefinition> RocketLeagueStats = new()
+        {
+            new("goals", "Goles", 1, null),
+            new("assists", "Asistencias", 1, null),
+            new("saves", "Atajadas", 1, null),
+            new("shots", "Tiros", 1, null)
+        };
+
         private static readonly List<StatDefinition> FcStats = new()
         {
             new("shots", "Tiros", 1, null),
@@ -44,7 +52,8 @@ namespace ProyectAPI.Services
             var stats = gameName switch
             {
                 "Valorant" => ValorantStats,
-                "Counter-Strike 2" => Cs2Stats,
+                "CS:GO" or "Counter-Strike 2" => Cs2Stats,
+                "Rocket League" => RocketLeagueStats,
                 "League of Legends" => LolStats,
                 "EA FC 27" => FcStats,
                 _ => new List<StatDefinition>()
@@ -52,8 +61,8 @@ namespace ProyectAPI.Services
 
             var unit = gameName switch
             {
-                "Valorant" or "Counter-Strike 2" => "Rondas",
-                "EA FC 27" => "Goles",
+                "Valorant" or "CS:GO" or "Counter-Strike 2" => "Rondas",
+                "EA FC 27" or "Rocket League" => "Goles",
                 _ => "Puntos"
             };
 

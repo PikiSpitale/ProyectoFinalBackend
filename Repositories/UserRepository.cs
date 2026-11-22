@@ -77,6 +77,11 @@ namespace ProyectAPI.Repositories
             return await _users.Find(user => user.Id == id).FirstOrDefaultAsync(cancellationToken);
         }
 
+        public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken)
+        {
+            return await _users.Find(user => user.Username == username).FirstOrDefaultAsync(cancellationToken);
+        }
+
         public async Task<List<User>> GetAllAsync(CancellationToken cancellationToken)
         {
             await _indexesInitialization.Value.WaitAsync(cancellationToken);

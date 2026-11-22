@@ -54,3 +54,22 @@ not initialize ratings, gates or indexes. Replica-set requirements are unchanged
 because these additive APIs did not yet exist; no runtime RED is claimed. The
 suite checks private filtering before pagination, claims, statuses, exact ranks
 and ties, player/team/game separation, unrated results, errors and no writes.
+
+## Login and match catalog corrections (2026-11-22)
+
+`POST /api/auth/login` accepts either `email` or `username` with `password`.
+Email is trimmed and lowercased; username is trimmed and matched exactly, using
+its existing unique index. If both are supplied, email keeps precedence; a failed
+email lookup does not fall back to username. Invalid credentials return HTTP 401
+with `Correo, usuario o contraseña incorrectos.` The cookie response is unchanged.
+
+Rocket League match details expose `goals`, `assists`, `saves`, and `shots` (step 1,
+nonnegative integers), using `Goles` as score unit. CS:GO exposes the existing
+Counter-Strike statistics (`kills`, `deaths`, `assists`, `money`) and `Rondas`.
+`Counter-Strike 2` remains a compatibility alias for catalog lookup. Existing
+winner thresholds and manual winner selection are unchanged; no migration is needed.
+
+Regression checks use a disposable local replica set via `TEST_MONGODB_URI`:
+`dotnet run --project tests/AuthTests`, `tests/WalletTests`, and
+`tests/TournamentTests`. AuthTests also checks cookie flags, JWT identity/role,
+exact username matching, and unchanged stored documents after rejected logins.

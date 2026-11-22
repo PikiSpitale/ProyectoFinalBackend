@@ -20,6 +20,28 @@ async Task<Tournament> Event(bool teams=false,bool free=false){var t=new Tournam
 TournamentParticipantDto Dto(User p)=>new(p.Id,"forged","forged","forged",DateTime.UtcNow);
 async Task<(Team,List<User>)> Team(){var players=new List<User>();for(var i=0;i<5;i++)players.Add(await User());var team=new Team{Id=ObjectId.GenerateNewId().ToString(),Name="team",GameName="Valorant",CaptainId=players[0].Id,Members=players.Select(x=>new TeamMember{UserId=x.Id,Username=x.Username,IsStarter=true}).ToList()};await db.GetCollection<Team>("Teams").InsertOneAsync(team);return(team,players);}
 try{
+var rocket = GameStatsCatalog.GetGameInfo("Rocket League");
+Check(rocket.ScoreUnit == "Goles" && rocket.WinScore is null && rocket.Stats.Select(x => x.Key).SequenceEqual(new[] { "goals", "assists", "saves", "shots" }), "Rocket League goals and manual winner catalog");
+var counter = GameStatsCatalog.GetGameInfo("CS:GO");
+var legacyCounter = GameStatsCatalog.GetGameInfo("Counter-Strike 2");
+Check(counter.Name == "CS:GO" && counter.ScoreUnit == "Rondas" && counter.Stats.SequenceEqual(legacyCounter.Stats), "canonical CS:GO stats preserve legacy alias");
+Check(GameStatsCatalog.GetGameInfo("Valorant").Stats.Count == 4 && GameStatsCatalog.GetGameInfo("Valorant").WinScore == 13, "Valorant catalog preserved");
+Check(GameStatsCatalog.GetGameInfo("League of Legends").Stats.Count == 5 && GameStatsCatalog.GetGameInfo("EA FC 27").ScoreUnit == "Goles" && GameStatsCatalog.GetGameInfo("unknown").Stats.Count == 0, "sibling game catalogs preserved");
+foreach (var game in new[] { "Rocket League", "CS:GO" }) {
+ var fixture = await Event();
+ await db.GetCollection<Tournament>("Tournaments").UpdateOneAsync(x => x.Id == fixture.Id, Builders<Tournament>.Update.Set(x => x.GameName, game).Set(x => x.Status, TournamentStatuses.InProgress));
+ var fixtureMatch = new TournamentMatch { Id = ObjectId.GenerateNewId().ToString(), TournamentId = fixture.Id, Round = 1, PlayerA = new MatchSlot { UserId = ObjectId.GenerateNewId().ToString() }, PlayerB = new MatchSlot { UserId = ObjectId.GenerateNewId().ToString() } };
+ await matchRepo.InsertManyAsync(new[] { fixtureMatch }, default);
+ var detail = (await stats.GetMatchDetailAsync(fixture.Id, fixtureMatch.Id, default))!;
+ Check(detail.StatsA.Values.All(x => x == 0) && detail.Game.Stats.Count == 4, game + " match detail exposes zero defaults");
+ var key = game == "Rocket League" ? "saves" : "kills";
+ await stats.UpdateStatAsync(fixture.Id, fixtureMatch.Id, new MatchStatRequest("A", key, 3), default);
+ detail = (await stats.GetMatchDetailAsync(fixture.Id, fixtureMatch.Id, default))!;
+ Check(detail.StatsA[key] == 3 && detail.StatsB[key] == 0, game + " stat persists without changing opponent");
+ await Reject(() => stats.UpdateStatAsync(fixture.Id, fixtureMatch.Id, new MatchStatRequest("A", key, -1), default), game + " negative stat rejected");
+ await Reject(() => stats.UpdateStatAsync(fixture.Id, fixtureMatch.Id, new MatchStatRequest("A", "invalid", 1), default), game + " unknown stat rejected");
+ Check((await stats.GetMatchDetailAsync(fixture.Id, fixtureMatch.Id, default))!.StatsA[key] == 3, game + " rejected stats preserve saved value");
+}
 var t=await Event();var player=await User();
 await service.RegisterParticipantAsync(t.Id,Dto(player),default);await service.RegisterParticipantAsync(t.Id,Dto(player),default);
 Check(await wallet.BalanceAsync(player.Id,default)==750,"single entry debit and retry");

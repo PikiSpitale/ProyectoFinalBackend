@@ -100,6 +100,18 @@ try
     var local = await users.GetByEmailAsync("local@example.invalid", default);
     Check(local is not null && await repo.BalanceAsync(local.Id, default) == 1000, "local register creates funded wallet");
     await auth.LoginAsync(new LoginRequest { Email = "local@example.invalid", Password = "Password123!" }, default);
+    Check((await auth.LoginAsync(new LoginRequest { Username = " local ", Password = "Password123!" }, default)).User.Id == local!.Id, "trimmed username login resolves registered account");
+    Check((await auth.LoginAsync(new LoginRequest { Email = " LOCAL@EXAMPLE.INVALID ", Username = "missing", Password = "Password123!" }, default)).User.Id == local.Id, "email normalization and priority preserved");
+    async Task InvalidLogin(LoginRequest request, string name)
+    {
+        try { await auth.LoginAsync(request, default); }
+        catch (InvalidCredentialsException) { Check(true, name); return; }
+        throw new Exception("Expected invalid credentials: " + name);
+    }
+    await InvalidLogin(new LoginRequest { Username = "local", Password = "wrong-password" }, "username wrong password rejected");
+    await InvalidLogin(new LoginRequest { Username = "missing", Password = "Password123!" }, "unknown username rejected");
+    await InvalidLogin(new LoginRequest { Email = "missing@example.invalid", Username = "local", Password = "Password123!" }, "invalid email cannot fall back to username");
+    await InvalidLogin(new LoginRequest { Password = "Password123!" }, "missing identifiers rejected");
     Check(await entries.CountDocumentsAsync(x => x.UserId == local!.Id) == 1, "login does not repeat bonus");
     var total = await entries.Find(x => x.UserId == user.Id).ToListAsync();
     Check(total.Sum(x => x.Amount) == await repo.BalanceAsync(user.Id, default), "ledger reconciles balance");

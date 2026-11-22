@@ -73,7 +73,7 @@ public sealed class AuthController : ControllerBase
         }
         catch (InvalidCredentialsException)
         {
-            return Unauthorized(new { message = "Correo o contraseña incorrectos." });
+            return Unauthorized(new { message = "Correo, usuario o contraseña incorrectos." });
         }
     }
 
